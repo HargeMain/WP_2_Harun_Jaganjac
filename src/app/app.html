@@ -232,6 +232,17 @@
       </svg>
       <h1>Hello, {{ title() }}</h1>
       <p>Congratulations! Your app is running. 🎉</p>
+      <button (click)="testInsert()"
+        style="padding:10px 20px;
+               background:#4CAF50;
+               border:none;
+               border-radius:6px;
+               color:white;
+               margin-top:20px;
+               cursor:pointer;">
+  Test Firestore Insert
+</button>
+
     </div>
     <div class="divider" role="separator" aria-label="Divider"></div>
     <div class="right-side">
