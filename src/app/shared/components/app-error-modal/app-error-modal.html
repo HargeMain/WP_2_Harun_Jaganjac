@@ -1,0 +1,19 @@
+
+<div class="modal-overlay" *ngIf="isOpen" [class.dark]="isDark">
+  <div class="modal">
+    
+    <div class="modal-header">
+      <h3>{{ errorTitle }}</h3>
+      <button class="close-btn" (click)="close.emit()"><span>✖</span></button>
+    </div>
+
+    <div class="modal-body">
+      {{ errorMessage }}
+    </div>
+
+    <div class="modal-footer">
+      <button class="ok-btn" (click)="close.emit()">OK</button>
+    </div>
+
+  </div>
+</div>

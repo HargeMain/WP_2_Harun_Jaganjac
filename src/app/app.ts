@@ -7,7 +7,8 @@ import { Firestore, collection, addDoc } from '@angular/fire/firestore';
   selector: 'app-root',
   imports: [RouterOutlet],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
+  standalone: true
 })
 export class App {
   protected readonly title = signal('WP_2_Harun_Jaganjac');

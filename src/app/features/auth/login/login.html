@@ -1,0 +1,61 @@
+<div class="auth-wrapper" [class.dark]="isDark">
+
+  <label class="theme-toggle">
+    <input type="checkbox" [checked]="isDark" (change)="toggleTheme()">
+    <span class="toggle">
+      <span class="sun material-icons">wb_sunny</span>
+      <span class="moon material-icons">nights_stay</span>
+    </span>
+  </label>
+
+  <div class="auth-card" [class.error-state]="errorMsg">
+
+    <h1 class="title">Welcome Back</h1>
+    <p class="sub">Log in to your account</p>
+
+    <form [formGroup]="form" (ngSubmit)="login()">
+
+      <div class="input">
+        <span class="icon material-icons">email</span>
+        <input type="email" placeholder="Email" formControlName="email">
+      </div>
+
+      <small class="error" *ngIf="email?.invalid && email?.touched">
+        Please enter a valid email
+      </small>
+
+      <div class="input">
+        <span class="icon material-icons">lock</span>
+        <input type="password" placeholder="Password" formControlName="password">
+      </div>
+
+      <small class="error" *ngIf="password?.invalid && password?.touched">
+        Minimum 6 characters required
+      </small>
+
+      <button [disabled]="form.invalid || isLoading" class="login-btn">
+        <span *ngIf="isLoading" class="spinner"></span>
+        {{ isLoading ? 'Logging in...' : 'Login' }}
+      </button>
+    </form>
+
+    <div class="footer">
+      Don’t have an account?
+      <a routerLink="/register">Create one</a>
+    </div>
+
+    <div *ngIf="errorMsg" class="alert">
+      {{ errorMsg }}
+    </div>
+
+  </div>
+  
+  <app-error-modal 
+    [errorTitle]="'Login Failed'"
+    [errorMessage]="errorMsg"
+    [isOpen]="isModalOpen"
+    [isDark]="isDark"
+    (close)="closeModal()"
+  ></app-error-modal>
+
+</div>

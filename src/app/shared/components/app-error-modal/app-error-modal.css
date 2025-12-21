@@ -1,0 +1,154 @@
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+  font-family: 'Roboto', sans-serif; 
+}
+
+.modal {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  animation: scaleIn 0.3s ease-in-out;
+  font-family: 'Roboto', sans-serif; /
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  display: inline-block; 
+  overflow: hidden; 
+  white-space: nowrap;
+  animation: typing 1.5s steps(20, end) forwards; 
+  letter-spacing: 0.05em; 
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: red;
+  cursor: pointer;
+  position: relative;
+}
+
+.close-btn span {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.modal-body {
+  margin-bottom: 20px;
+  color: #333;
+  animation: fadeInText 0.5s ease-in-out;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: center; 
+}
+
+.ok-btn {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; 
+  transition: background-color 0.3s ease;
+}
+
+.ok-btn:hover {
+  background-color: darkred;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes fadeInText {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-overlay.dark {
+  background-color: rgba(255, 255, 255, 0.1); 
+}
+
+.modal-overlay.dark .modal {
+  background-color: #333;
+  color: white;
+  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+}
+
+.modal-overlay.dark .modal-body {
+  color: #ddd;
+}
+
+.modal-overlay.dark .close-btn {
+  color: #ff6666; 
+}
+
+.modal-overlay.dark .ok-btn {
+  background-color: #ff0000;
+}
+
+.modal-overlay.dark .ok-btn:hover {
+  background-color: #cc0000;
+}
