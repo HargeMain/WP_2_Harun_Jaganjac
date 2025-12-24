@@ -1,0 +1,125 @@
+<router-outlet></router-outlet>
+
+<div class="auth-wrapper" [class.dark]="isDark">
+
+  <label class="theme-toggle">
+    <input type="checkbox" [checked]="isDark" (change)="toggleTheme()">
+    <span class="toggle">
+      <span class="sun material-icons">wb_sunny</span>
+      <span class="moon material-icons">nights_stay</span>
+    </span>
+  </label>
+
+  <div class="auth-card">
+
+    <h1 class="title">Create Account</h1>
+    <p class="sub">Sign up for a new account</p>
+
+    <form [formGroup]="form" (ngSubmit)="register()">
+
+      <div class="upload avatar-container" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)" [class.drag-over]="isDragOver">
+        <div class="avatar-preview">
+          <span *ngIf="isUploading" class="spinner"></span>
+          <ng-container *ngIf="!isUploading">
+            <img *ngIf="form.value.imageBase64" [src]="form.value.imageBase64">
+            <span *ngIf="!form.value.imageBase64" class="material-icons default-avatar">account_circle</span>
+          </ng-container>
+        </div>
+        <label for="avatar" class="upload-overlay">
+          <span class="upload-text">Upload +</span>
+        </label>
+        <input type="file" id="avatar" accept="image/*" (change)="onFileChange($event)">
+      </div>
+
+      <div class="input" [class.invalid]="email?.invalid && (email?.touched || email?.dirty)">
+        <span class="icon material-icons">email</span>
+        <input type="email" placeholder="Email" formControlName="email">
+      </div>
+      <small class="error" *ngIf="email?.hasError('required') && (email?.touched || email?.dirty)">
+        Email is required
+      </small>
+      <small class="error" *ngIf="email?.hasError('email') && (email?.touched || email?.dirty)">
+        Please enter a valid email
+      </small>
+
+      <div class="input" [class.invalid]="userName?.invalid && (userName?.touched || userName?.dirty)">
+        <span class="icon material-icons">person</span>
+        <input type="text" placeholder="Username" formControlName="userName">
+      </div>
+      <small class="error" *ngIf="userName?.hasError('required') && (userName?.touched || userName?.dirty)">
+        Username is required
+      </small>
+
+      <div class="input" [class.invalid]="name?.invalid && (name?.touched || name?.dirty)">
+        <span class="icon material-icons">person_outline</span>
+        <input type="text" placeholder="Name" formControlName="name">
+      </div>
+      <small class="error" *ngIf="name?.hasError('required') && (name?.touched || name?.dirty)">
+        Name is required
+      </small>
+
+      <div class="input" [class.invalid]="surname?.invalid && (surname?.touched || surname?.dirty)">
+        <span class="icon material-icons">person_outline</span>
+        <input type="text" placeholder="Surname" formControlName="surname">
+      </div>
+      <small class="error" *ngIf="surname?.hasError('required') && (surname?.touched || surname?.dirty)">
+        Surname is required
+      </small>
+
+      <div class="input" [class.invalid]="age?.invalid && (age?.touched || age?.dirty)">
+        <span class="icon material-icons">calendar_today</span>
+        <input type="number" placeholder="Age" formControlName="age">
+      </div>
+      <small class="error" *ngIf="age?.hasError('required') && (age?.touched || age?.dirty)">
+        Age is required
+      </small>
+      <small class="error" *ngIf="age?.hasError('min') && (age?.touched || age?.dirty)">
+        Age must be at least 0
+      </small>
+
+      <div class="input" [class.invalid]="password?.invalid && (password?.touched || password?.dirty)">
+        <span class="icon material-icons">lock</span>
+        <input type="password" placeholder="Password" formControlName="password">
+      </div>
+      <small class="error" *ngIf="password?.hasError('required') && (password?.touched || password?.dirty)">
+        Password is required
+      </small>
+      <small class="error" *ngIf="password?.hasError('minlength') && (password?.touched || password?.dirty)">
+        Password must be at least 6 characters
+      </small>
+      <small class="error" *ngIf="password?.hasError('invalidPassword') && (password?.touched || password?.dirty)">
+        Password must contain at least one uppercase letter, one special character, and one number
+      </small>
+
+      <div class="color-picker">
+        <label>Primary Color</label>
+        <input type="color" formControlName="primaryColor">
+      </div>
+
+      <div class="color-picker">
+        <label>Secondary Color</label>
+        <input type="color" formControlName="secondaryColor">
+      </div>
+
+      <button [disabled]="isLoading" class="login-btn">
+        <span *ngIf="isLoading" class="spinner"></span>
+        {{ isLoading ? 'Registering...' : 'Register' }}
+      </button>
+    </form>
+
+    <div class="footer">
+      Already have an account?
+      <a routerLink="/login">Log in</a>
+    </div>
+
+  </div>
+  
+  <app-error-modal 
+    [errorTitle]="'Registration Error'"
+    [errorMessage]="errorMsg"
+    [isOpen]="isModalOpen"
+    [isDark]="isDark"
+    (close)="closeModal()"
+  ></app-error-modal>
+
+</div>

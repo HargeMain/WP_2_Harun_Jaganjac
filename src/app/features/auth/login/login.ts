@@ -3,12 +3,15 @@ import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angula
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { ErrorModalComponent } from '../../../shared/components/app-error-modal/app-error-modal';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
+    RouterOutlet,
     CommonModule,
+    RouterLink,
     ReactiveFormsModule,
     ErrorModalComponent
   ],
@@ -23,7 +26,7 @@ export class LoginComponent implements OnInit {
   isModalOpen = false;
   form!: FormGroup;
 
-  constructor(private fb: FormBuilder, private auth: AuthService, private cdr: ChangeDetectorRef) {
+  constructor(private fb: FormBuilder, private auth: AuthService, private cdr: ChangeDetectorRef, private router: Router) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
@@ -33,6 +36,11 @@ export class LoginComponent implements OnInit {
   ngOnInit() {
     const theme = this.getCookie('theme');
     this.isDark = theme === 'dark';
+
+    const state = history.state;
+    if (state && state.email && state.password) {
+      this.form.patchValue({ email: state.email, password: state.password });
+    }
   }
 
   get email() { return this.form.get('email'); }
@@ -55,8 +63,8 @@ export class LoginComponent implements OnInit {
       const user = await this.auth.login(email!, password!);
 
       if (user) {
-        alert('Logged in 🔥');
-        console.log('Logged user:', user);
+        localStorage.setItem('user', JSON.stringify(user));
+        this.router.navigate(['/main']);
       }
 
     } catch (err: any) {

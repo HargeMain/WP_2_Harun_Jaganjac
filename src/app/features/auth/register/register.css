@@ -3,20 +3,16 @@
 :root {
   --primary: #1e3a8a; 
   --accent: #3b82f6; 
-  --glass: rgba(255, 255, 255, 0.9); 
+  --glass: rgba(30, 58, 138, 0.9);
   --white: #fff;
-  --text: #1e3a8a; 
-  --sub: #6b7280;
+  --text: #fff; 
+  --sub: #9ca3af;
   --error: #ef4444;
   --bg-gradient-start: #ffffff;
   --bg-gradient-end: #f9fafb;
-  --shadow: rgba(0, 0, 0, 0.1);
-  --input-bg: #f8fafc;
+  --shadow: rgba(30, 58, 138, 0.15); 
+  --input-bg: #ffffff;
   --input-hover: rgba(59, 130, 246, 0.1);
-  --input-border: #cbd5e1;
-  --input-focus-border: #1e3a8a;
-  --input-text: #1e293b;
-  --input-placeholder: #64748b;
   --button-hover-scale: 1.05;
   --transition: 0.4s ease-in-out;
   --font-family: 'Inter', sans-serif;
@@ -31,12 +27,8 @@
   --bg-gradient-start: #000000;
   --bg-gradient-end: #111827;
   --shadow: rgba(0, 0, 0, 0.7);
-  --input-bg: #1f2937;
+  --input-bg: #000000;
   --input-hover: rgba(96, 165, 250, 0.2);
-  --input-border: #374151;
-  --input-focus-border: #60a5fa;
-  --input-text: #e5e7eb;
-  --input-placeholder: #9ca3af;
   --white: #000000;
 }
 
@@ -93,14 +85,12 @@
   opacity: 1;
   transition: var(--transition);
   transform: rotate(0deg) scale(1);
-  color: #fbbf24;
 }
 
 .theme-toggle .moon {
   opacity: 0;
   transition: var(--transition);
   transform: rotate(180deg) scale(0.8);
-  color: #e5e7eb;
 }
 
 .theme-toggle input:checked + .toggle .sun {
@@ -138,40 +128,6 @@
   animation: shake 0.5s, bounceIn 1s ease-out;
 }
 
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
-}
-
-.header-section {
-  margin-bottom: 20px;
-}
-
-.animated-label {
-  font-size: 24px;
-  font-weight: 800;
-  color: var(--accent);
-  animation: fadeInBounce 1s ease-in-out;
-}
-
-@keyframes fadeInBounce {
-  0% { opacity: 0; transform: translateY(-20px); }
-  60% { opacity: 1; transform: translateY(5px); }
-  100% { transform: translateY(0); }
-}
-
-.animated-logo {
-  width: 100px;
-  height: auto;
-  animation: rotateScale 2s infinite ease-in-out;
-}
-
-@keyframes rotateScale {
-  0% { transform: rotate(0deg) scale(1); }
-  50% { transform: rotate(180deg) scale(1.2); }
-  100% { transform: rotate(360deg) scale(1); }
-}
 
 .title {
   font-size: 42px;
@@ -196,11 +152,6 @@
   animation: fadeIn 1s ease-in;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
 .input {
   display: flex;
   align-items: center;
@@ -210,8 +161,11 @@
   margin-top: 16px;
   transition: var(--transition);
   box-shadow: 0 4px 10px var(--shadow);
-  border: 2px solid var(--input-border);
-  position: relative;
+  border: 1px solid var(--primary);
+}
+
+.input.invalid {
+  border-color: var(--error);
 }
 
 .input:hover,
@@ -219,7 +173,7 @@
   background: var(--input-hover);
   transform: scale(1.02) translateY(-3px);
   box-shadow: 0 6px 14px var(--shadow);
-  border-color: var(--input-focus-border);
+  border-color: var(--accent);
 }
 
 .input input {
@@ -230,41 +184,24 @@
   font-size: 17px;
   font-weight: 600; 
   transition: var(--transition);
-  color: var(--input-text);
-  font-family: inherit;
-  padding: 0;
-  margin: 0;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-}
-
-.input input:focus {
-  outline: none;
-  box-shadow: none;
+  color: var(--primary);
 }
 
 .input input::placeholder {
-  color: var(--input-placeholder);
+  color: rgba(30, 58, 138, 0.6);
   font-weight: 500;
-  opacity: 0.8;
 }
 
 .icon {
   margin-right: 14px;
   transition: var(--transition);
   font-size: 24px;
-  color: var(--input-text);
+  color: var(--primary);
 }
 
 .input:focus-within .icon {
   color: var(--accent);
   animation: spin 0.5s;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 
 .error {
@@ -276,16 +213,105 @@
   animation: shake 0.4s;
 }
 
+.color-picker {
+  margin-top: 16px;
+  text-align: left;
+}
+
+.color-picker label {
+  display: block;
+  color: var(--text);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.color-picker input {
+  width: 100%;
+  height: 40px;
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.avatar-container {
+  position: relative;
+  margin: 0 auto 20px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px dashed var(--primary);
+  transition: border-color 0.3s;
+}
+
+.avatar-container.drag-over {
+  border-color: var(--accent);
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.avatar-preview {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.avatar-preview img,
+.avatar-preview .default-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.3s ease;
+}
+
+.avatar-preview .default-avatar {
+  color: var(--primary);
+  font-size: 80px; 
+}
+
+.avatar-container:hover .avatar-preview img,
+.avatar-container:hover .avatar-preview .default-avatar {
+  opacity: 0.3;
+}
+
+.upload-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  background: var(--accent);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+  font-weight: bold;
+}
+
+.avatar-container:hover .upload-overlay {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.1);
+  pointer-events: auto;
+}
+
+.avatar-container input[type="file"] {
+  display: none;
+}
+
 .login-btn {
   margin-top: 24px;
   width: 100%;
   padding: 16px;
   border-radius: 16px;
   border: none;
-  background: var(--primary);
-  color: white;
+  background: var(--white);
+  color: var(--primary);
   font-size: 20px;
-  font-weight: 800;
+  font-weight: 800; 
   cursor: pointer;
   transition: var(--transition);
   box-shadow: 0 6px 14px var(--shadow);
@@ -294,7 +320,6 @@
   justify-content: center;
   position: relative;
   text-transform: uppercase;
-  font-family: inherit;
 }
 
 .login-btn:hover {
@@ -313,8 +338,8 @@
 }
 
 .spinner {
-  border: 4px solid rgba(255, 255, 255, 0.4);
-  border-top: 4px solid white;
+  border: 4px solid rgba(30, 58, 138, 0.4);
+  border-top: 4px solid var(--primary);
   border-radius: 50%;
   width: 24px;
   height: 24px;
@@ -333,8 +358,8 @@
   color: var(--accent);
   text-decoration: none;
   font-weight: 800;
-  transition: var(--transition);
   cursor: pointer;
+  transition: var(--transition);
 }
 
 .footer a:hover {
@@ -343,55 +368,43 @@
   animation: excite 0.5s;
 }
 
-.alert {
-  margin-top: 14px;
-  background: rgba(239, 68, 68, 0.1);
-  padding: 12px;
-  border-radius: 12px;
-  color: var(--error);
-  font-size: 15px;
-  text-align: center;
-  width: 100%;
-  box-sizing: border-box;
-  animation: fadeIn 0.4s, shake 0.5s;
-  font-weight: 700;
-  border: 1px solid var(--error);
-}
-
-.auth-wrapper.dark .input {
-  border-color: var(--input-border);
-}
-
-.auth-wrapper.dark .input:hover,
-.auth-wrapper.dark .input:focus-within {
-  border-color: var(--input-focus-border);
-}
-
 .auth-wrapper.dark .input input {
-  color: var(--input-text);
+  color: var(--accent);
+}
+
+.auth-wrapper.dark .input .icon {
+  color: var(--accent);
 }
 
 .auth-wrapper.dark .input input::placeholder {
-  color: var(--input-placeholder);
+  color: #9ca3af;
 }
 
-.auth-wrapper.dark .icon {
-  color: var(--input-text);
+.auth-wrapper.dark .login-btn {
+  color: var(--accent);
 }
 
-.auth-wrapper:not(.dark) .login-btn {
-  color: white;
+.auth-wrapper.dark .login-btn:hover {
+  color: #fff;
 }
 
-.auth-wrapper:not(.dark) .spinner {
-  border: 4px solid rgba(255, 255, 255, 0.4);
-  border-top: 4px solid white;
+.auth-wrapper.dark .spinner {
+  border: 4px solid rgba(96, 165, 250, 0.4);
+  border-top: 4px solid var(--accent);
 }
 
-input[type="email"],
-input[type="password"] {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  border-radius: 0;
+.auth-wrapper.dark .upload-overlay {
+  background: var(--accent);
+}
+
+.auth-wrapper.dark .color-picker label {
+  color: #fff;
+}
+
+.auth-wrapper.dark .default-avatar {
+  color: var(--accent);
+}
+
+.auth-wrapper.dark .avatar-container {
+  border-color: var(--accent);
 }

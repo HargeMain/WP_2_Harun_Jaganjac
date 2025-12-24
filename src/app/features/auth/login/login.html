@@ -1,3 +1,5 @@
+<router-outlet></router-outlet>
+
 <div class="auth-wrapper" [class.dark]="isDark">
 
   <label class="theme-toggle">
@@ -9,6 +11,11 @@
   </label>
 
   <div class="auth-card" [class.error-state]="errorMsg">
+
+    <div class="header-section">
+      <h2 class="animated-label">IPIa Fun zone</h2>
+      <img src="assets/images/logo.png" class="animated-logo" alt="Logo">
+    </div>
 
     <h1 class="title">Welcome Back</h1>
     <p class="sub">Log in to your account</p>

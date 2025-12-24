@@ -1,0 +1,126 @@
+.drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 280px; 
+  padding: 30px 20px;
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.15); 
+  z-index: 1000;
+  overflow-y: auto;
+  transform: translateX(-100%);
+  opacity: 0;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  font-family: 'Inter', sans-serif; 
+  border-right: 1px solid rgba(255, 255, 255, 0.1); 
+}
+
+.drawer.open {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.drawer-header {
+  text-align: center;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 0;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.logo {
+  width: 100px;
+  height: auto;
+  margin-bottom: 15px;
+  transition: transform 0.3s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05); 
+}
+
+.drawer-header h2 {
+  font-weight: 900; 
+  font-size: 24px;
+  margin: 0;
+}
+
+.menu-items {
+  list-style: none;
+  padding: 0;
+}
+
+.menu-items li {
+  margin-bottom: 20px;
+}
+
+.menu-items a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 18px;
+  transition: color 0.3s ease, transform 0.3s ease;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.menu-items a:hover {
+  background-color: rgba(255, 255, 255, 0.1); 
+  transform: translateX(5px); 
+}
+
+.menu-icon,
+.submenu-icon,
+.expand-icon {
+  margin-right: 15px;
+  font-size: 28px; 
+  font-weight: bold; 
+}
+
+.submenu {
+  list-style: none;
+  padding-left: 40px;
+  margin-top: 10px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+}
+
+.submenu.show {
+  max-height: 300px; 
+}
+
+.submenu li {
+  margin-bottom: 10px;
+}
+
+.submenu a {
+  font-size: 16px;
+  font-weight: 600; 
+}
+
+.toggle-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1001;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 28px; 
+  transition: transform 0.3s ease;
+}
+
+.toggle-btn:hover {
+  transform: rotate(90deg);
+}
