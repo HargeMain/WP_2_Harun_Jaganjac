@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, query, where, getDocs, addDoc } from '@angular/fire/firestore';
+import { Firestore, collection, query, where, getDocs, addDoc, updateDoc, doc } from '@angular/fire/firestore';
 import { AppUser } from '../models/user.model';
 
 @Injectable({
@@ -51,4 +51,35 @@ export class AuthService {
 
     return user;
   }
+
+  async updateUserByEmail(
+  email: string,
+  data: { password?: string; imageBase64?: string }
+) {
+  const usersRef = collection(this.firestore, 'users');
+
+  const q = query(usersRef, where('email', '==', email));
+  const snap = await getDocs(q);
+
+  if (snap.empty) {
+    throw new Error('User not found');
+  }
+
+  const userDoc = snap.docs[0];
+  const userRef = doc(this.firestore, 'users', userDoc.id);
+
+  await updateDoc(userRef, {
+    ...(data.password && { password: data.password }),
+    ...(data.imageBase64 && { imageBase64: data.imageBase64 }),
+    updatedAt: Date.now()
+  });
+
+  return {
+    uid: userDoc.id,
+    ...userDoc.data(),
+    ...data
+  };
 }
+
+}
+

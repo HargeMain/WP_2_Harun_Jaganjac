@@ -1,1 +1,11 @@
-<p>footer works!</p>
+<footer class="footer"
+        [class.drawer-open]="isDrawerOpen"
+        [style.background-color]="primaryColor"
+        [style.color]="secondaryColor">
+
+  <div class="footer-content">
+    <div class="copyright">&copy; Harun Jaganjac 2025</div>
+  </div>
+
+  <div class="clock">{{ currentDateTime }}</div>
+</footer>

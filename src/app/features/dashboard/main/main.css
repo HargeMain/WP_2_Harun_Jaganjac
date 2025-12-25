@@ -1,13 +1,18 @@
 .main-container {
   display: flex;
+  flex-direction: column;
   height: 100vh;
   overflow: hidden;
 }
 
 .content {
   flex: 1;
-  padding: 20px;
+  padding: 100px 20px 80px 20px;
   background-color: #f0f0f0; 
   overflow-y: auto;
+  transition: padding-left 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
 }
 
+.content.drawer-open {
+  padding-left: 300px; 
+}

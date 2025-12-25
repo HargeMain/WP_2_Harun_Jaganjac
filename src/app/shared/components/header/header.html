@@ -1,1 +1,151 @@
-<p>header works!</p>
+<div
+  class="header"
+  [class.drawer-open]="isDrawerOpen"
+  [style.background-color]="primaryColor"
+>
+
+  <div class="header-content">
+
+    <div class="left-section">
+      <span
+        class="material-icons header-icon"
+        [style.color]="secondaryColor"
+      >
+        dashboard
+      </span>
+
+      <h1 class="ipia-text" [style.color]="secondaryColor">
+        IPIa
+      </h1>
+    </div>
+
+    <div class="profile-section" (click)="toggleMenu()">
+
+      <div class="profile-picture">
+        <img
+          *ngIf="user.imageBase64"
+          [src]="user.imageBase64"
+          alt="Profile"
+        />
+        <span
+          *ngIf="!user.imageBase64"
+          class="material-icons default-profile"
+          [style.color]="secondaryColor"
+        >
+          account_circle
+        </span>
+      </div>
+
+      <p
+        class="username"
+        [class.admin]="role === 'admin'"
+        [style.color]="secondaryColor"
+      >
+        {{ user.userName }}
+        <span
+          *ngIf="role === 'admin'"
+          class="material-icons crown-icon"
+        >
+          local_police
+        </span>
+      </p>
+
+      <span
+        class="material-icons expand-icon"
+        [class.open]="showMenu"
+        [style.color]="secondaryColor"
+      >
+        expand_more
+      </span>
+
+    </div>
+  </div>
+
+  <div
+    class="hamburger-menu"
+    *ngIf="showMenu"
+    [style.background]="
+      'linear-gradient(145deg,' + primaryColor + ', rgba(0,0,0,0.8))'
+    "
+    [style.color]="secondaryColor"
+  >
+    <ul>
+
+      <li (click)="openChangeDetails()">
+        <span class="material-icons">manage_accounts</span>
+        <span>Change details</span>
+      </li>
+
+      <li class="logout" (click)="logout()">
+        <span class="material-icons">logout</span>
+        <span>Logout</span>
+      </li>
+
+    </ul>
+  </div>
+</div>
+
+<div
+  class="modal-overlay"
+  *ngIf="showModal"
+  (click)="closeModal()"
+>
+  <div
+    class="modal"
+    (click)="$event.stopPropagation()"
+    [style.background-color]="primaryColor"
+    [style.color]="secondaryColor"
+  >
+
+    <h2>Change Details</h2>
+
+    <form [formGroup]="changeDetailsForm">
+
+      <div class="input-group">
+        <label>New Password</label>
+        <input type="password" formControlName="newPassword" />
+      </div>
+
+      <div class="input-group">
+        <label>Profile Picture</label>
+        <div class="upload avatar-container">
+          <div class="avatar-preview">
+            <span *ngIf="isUploading" class="spinner"></span>
+            <ng-container *ngIf="!isUploading">
+              <img *ngIf="changeDetailsForm.value.imageBase64" [src]="changeDetailsForm.value.imageBase64">
+              <span *ngIf="!changeDetailsForm.value.imageBase64" class="material-icons default-avatar">account_circle</span>
+            </ng-container>
+          </div>
+          <label for="avatar" class="upload-overlay">
+            <span class="upload-text">Upload +</span>
+          </label>
+          <input type="file" id="avatar" accept="image/*" (change)="onFileChange($event)">
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button
+          type="button"
+          (click)="submitChanges()"
+          [disabled]="isLoading"
+        >
+          <span *ngIf="isLoading" class="spinner"></span>
+          {{ isLoading ? 'Updating...' : 'Save Changes' }}
+        </button>
+        <button type="button" (click)="closeModal()">
+          Cancel
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<div
+  class="notification"
+  *ngIf="showNotification"
+  [style.background-color]="primaryColor"
+  [style.color]="secondaryColor"
+>
+  {{ notificationMessage }}
+</div>

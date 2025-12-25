@@ -8,6 +8,9 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class UserService {
+  getUserByEmail(email: any) {
+    throw new Error('Method not implemented.');
+  }
   private firestore = inject(Firestore);
 
   async getUser(uid: string): Promise<AppUser | null> {

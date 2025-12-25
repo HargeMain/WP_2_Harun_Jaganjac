@@ -3,8 +3,22 @@
     [primaryColor]="primaryColor"
     [secondaryColor]="secondaryColor"
     [role]="role"
+    (drawerStateChange)="onDrawerStateChange($event)"
   ></app-drawer-menu>
 
-  <div class="content">
+  <app-header
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [role]="role"
+    [isDrawerOpen]="isDrawerOpen"
+  ></app-header>
+
+  <div class="content" [class.drawer-open]="isDrawerOpen">
   </div>
+
+  <app-footer
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [isDrawerOpen]="isDrawerOpen"
+  ></app-footer>
 </div>

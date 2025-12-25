@@ -1,18 +1,25 @@
 .drawer {
   position: fixed;
-  top: 0;
+  top: 72px; 
   left: 0;
-  height: 100vh;
-  width: 280px; 
-  padding: 30px 20px;
-  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.15); 
-  z-index: 1000;
+  height: calc(100vh - 72px);
+  width: 280px;
+  padding: 24px 20px;
+
+  background: rgba(15, 15, 15, 0.97);
+  backdrop-filter: blur(10px);
+
+  box-shadow: 12px 0 30px rgba(0, 0, 0, 0.25);
+  border-right: none;
+
+  z-index: 2001;
   overflow-y: auto;
+
   transform: translateX(-100%);
   opacity: 0;
-  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-  font-family: 'Inter', sans-serif; 
-  border-right: 1px solid rgba(255, 255, 255, 0.1); 
+  transition: transform 0.35s cubic-bezier(.4,0,.2,1),
+              opacity 0.25s ease;
+  font-family: 'Poppins', 'Inter', sans-serif;
 }
 
 .drawer.open {
@@ -35,6 +42,21 @@
   cursor: pointer;
   font-size: 24px;
 }
+
+.drawer::before {
+  content: '';
+  position: absolute;
+  top: -72px;
+  left: 0;
+  width: 100%;
+  height: 72px;
+
+  background: inherit;
+  backdrop-filter: inherit;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 
 .logo {
   width: 100px;
@@ -111,16 +133,26 @@
 
 .toggle-btn {
   position: fixed;
-  top: 20px;
-  left: 20px;
-  z-index: 1001;
-  background: none;
+  top: 88px; 
+  left: 18px;
+
+  z-index: 2100; 
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+
   border: none;
+  border-radius: 12px;
+  padding: 8px;
   cursor: pointer;
-  font-size: 28px; 
-  transition: transform 0.3s ease;
+
+  font-size: 26px;
+  color: white;
+
+  transition: transform 0.25s ease, background 0.25s ease;
 }
 
+
 .toggle-btn:hover {
-  transform: rotate(90deg);
+  transform: scale(1.1) rotate(90deg);
+  background: rgba(255,255,255,0.1);
 }
