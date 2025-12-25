@@ -13,7 +13,13 @@
     [isDrawerOpen]="isDrawerOpen"
   ></app-header>
 
-  <div class="content" [class.drawer-open]="isDrawerOpen">
+  <div class="content" [class.drawer-open]="isDrawerOpen" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+    <div class="welcome-container">
+      <span class="material-icons welcome-icon" [ngClass]="{ 'admin-icon': role === 'admin' }">waving_hand</span>
+      <h1 class="welcome-text" [class.admin-welcome]="role === 'admin'">
+        {{ role === 'admin' ? 'WELCOME MR ADMIN!' : 'WELCOME MR ' + username }}
+      </h1>
+    </div>
   </div>
 
   <app-footer

@@ -21,6 +21,14 @@
 
     <div class="profile-section" (click)="toggleMenu()">
 
+       <span
+  *ngIf="role === 'admin'"
+  class="material-icons crown-icon"
+  [style.color]="secondaryColor"
+>
+  workspace_premium
+</span>
+
       <div class="profile-picture">
         <img
           *ngIf="user.imageBase64"
@@ -42,12 +50,6 @@
         [style.color]="secondaryColor"
       >
         {{ user.userName }}
-        <span
-          *ngIf="role === 'admin'"
-          class="material-icons crown-icon"
-        >
-          local_police
-        </span>
       </p>
 
       <span

@@ -8,11 +8,64 @@
 .content {
   flex: 1;
   padding: 100px 20px 80px 20px;
-  background-color: #f0f0f0; 
   overflow-y: auto;
   transition: padding-left 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
 .content.drawer-open {
   padding-left: 300px; 
+}
+
+.welcome-container {
+  display: flex;
+  align-items: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  gap: 15px;
+}
+
+.welcome-icon {
+  font-size: 50px;
+  animation: wave 1.5s infinite;
+}
+
+.admin-icon {
+  color: gold !important;
+  animation: waveGlow 1.5s infinite;
+}
+
+.welcome-text {
+  font-size: 48px; 
+  font-weight: 900;
+  animation: fadeIn 1s ease-in-out;
+}
+
+.admin-welcome {
+  color: gold !important;
+  animation: goldenGlow 2s infinite alternate;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes wave {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-20deg); }
+  75% { transform: rotate(20deg); }
+}
+
+@keyframes waveGlow {
+  0%, 100% { transform: rotate(0deg); text-shadow: 0 0 5px gold; }
+  25% { transform: rotate(-20deg); text-shadow: 0 0 15px gold; }
+  75% { transform: rotate(20deg); text-shadow: 0 0 10px gold; }
+}
+
+@keyframes goldenGlow {
+  from { text-shadow: 0 0 5px gold; }
+  to { text-shadow: 0 0 25px gold; }
 }
