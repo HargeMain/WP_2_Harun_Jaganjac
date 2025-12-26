@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Firestore, collection, query, where, getDocs, addDoc, updateDoc, doc } from '@angular/fire/firestore';
 import { AppUser } from '../models/user.model';
+import { TrackersService } from './trackers.service'; 
 
 @Injectable({
   providedIn: 'root'
@@ -8,6 +9,7 @@ import { AppUser } from '../models/user.model';
 export class AuthService {
 
   private firestore = inject(Firestore);
+  private trackersService = inject(TrackersService);
 
   async login(email: string, password: string) {
 
@@ -49,6 +51,8 @@ export class AuthService {
     const docRef = await addDoc(usersRef, user);
     user.uid = docRef.id;
 
+    await this.trackersService.createDefaultTrackers(user.uid);
+
     return user;
   }
 
@@ -82,4 +86,3 @@ export class AuthService {
 }
 
 }
-

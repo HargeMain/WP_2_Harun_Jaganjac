@@ -163,7 +163,6 @@ export class RegisterComponent implements OnInit {
 
     try {
       const user = await this.auth.register(this.form.value as AppUser);
-      alert('Registered successfully 🔥');
       this.router.navigate(['/login'], { state: { email: this.form.value.email, password: this.form.value.password } });
     } catch (err: any) {
       this.errorMsg = err.message || 'Registration failed';
