@@ -12,7 +12,7 @@
   </div>
   <ul class="menu-items">
     <li>
-      <a (click)="toggleDrawer()" [style.color]="secondaryColor">
+      <a (click)="navigateAndClose('/trackers-dashboard')" [style.color]="secondaryColor">
         <span class="material-icons menu-icon" [style.color]="secondaryColor">fitness_center</span>
         Personal Life Dashboard
       </a>
@@ -24,15 +24,15 @@
         <span class="material-icons expand-icon" [style.color]="secondaryColor">{{ showSubmenu ? 'expand_less' : 'expand_more' }}</span>
       </a>
       <ul class="submenu" [class.show]="showSubmenu">
-        <li><a (click)="toggleDrawer()" [style.color]="secondaryColor"><span class="material-icons submenu-icon" [style.color]="secondaryColor">games</span>Bingo</a></li>
-        <li><a (click)="toggleDrawer()" [style.color]="secondaryColor"><span class="material-icons submenu-icon" [style.color]="secondaryColor">quiz</span>Kviz</a></li>
-        <li><a (click)="toggleDrawer()" [style.color]="secondaryColor"><span class="material-icons submenu-icon" [style.color]="secondaryColor">edit</span>Whiteboard</a></li>
-        <li><a (click)="toggleDrawer()" [style.color]="secondaryColor"><span class="material-icons submenu-icon" [style.color]="secondaryColor">view_kanban</span>Kanban</a></li>
-        <li><a (click)="toggleDrawer()" [style.color]="secondaryColor"><span class="material-icons submenu-icon" [style.color]="secondaryColor">visibility</span>Vision board</a></li>
+        <li><a (click)="navigateAndClose('/bingo')" [style.color]="secondaryColor"><span class="material-icons submenu-icon" [style.color]="secondaryColor">games</span>Bingo</a></li>
+        <li><a (click)="navigateAndClose('/kviz')" [style.color]="secondaryColor"><span class="material-icons submenu-icon" [style.color]="secondaryColor">quiz</span>Kviz</a></li>
+        <li><a (click)="navigateAndClose('/whiteboard')" [style.color]="secondaryColor"><span class="material-icons submenu-icon" [style.color]="secondaryColor">edit</span>Whiteboard</a></li>
+        <li><a (click)="navigateAndClose('/kanban')" [style.color]="secondaryColor"><span class="material-icons submenu-icon" [style.color]="secondaryColor">view_kanban</span>Kanban</a></li>
+        <li><a (click)="navigateAndClose('/vision-board')" [style.color]="secondaryColor"><span class="material-icons submenu-icon" [style.color]="secondaryColor">visibility</span>Vision board</a></li>
       </ul>
     </li>
     <li *ngIf="role === 'admin'">
-      <a (click)="toggleDrawer()" [style.color]="secondaryColor">
+      <a (click)="navigateAndClose('/user-settings')" [style.color]="secondaryColor">
         <span class="material-icons menu-icon" [style.color]="secondaryColor">settings</span>
         User Settings
       </a>

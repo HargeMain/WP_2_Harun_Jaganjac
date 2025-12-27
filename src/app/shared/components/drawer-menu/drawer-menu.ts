@@ -1,10 +1,11 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule, Router } from '@angular/router';
 
 @Component({
   selector: 'app-drawer-menu',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './drawer-menu.html',
   styleUrls: ['./drawer-menu.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -19,6 +20,8 @@ export class DrawerMenu {
   isOpen = false;
   showSubmenu = false;
 
+  constructor(private router: Router) {}
+
   toggleDrawer() {
     this.isOpen = !this.isOpen;
     this.drawerStateChange.emit(this.isOpen);
@@ -26,5 +29,10 @@ export class DrawerMenu {
 
   toggleSubmenu() {
     this.showSubmenu = !this.showSubmenu;
+  }
+
+  navigateAndClose(path: string) {
+    this.router.navigate([path]);
+    this.toggleDrawer();
   }
 }

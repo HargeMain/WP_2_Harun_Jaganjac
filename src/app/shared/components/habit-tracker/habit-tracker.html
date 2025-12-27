@@ -1,0 +1,99 @@
+<div class="habit-tracker-container" [style.background-color]="primaryColor" [style.color]="secondaryColor">
+  <div class="header-section">
+    <span class="material-icons tracker-icon" [style.color]="secondaryColor">psychology</span>
+    <h2 class="title">Habit Tracker</h2>
+  </div>
+
+  <div class="habit-main-layout">
+    <div class="left-column">
+      <form [formGroup]="habitForm" (ngSubmit)="onSubmit()" class="habit-form">
+        <div class="input-group">
+          <label>Date</label>
+          <input type="date" formControlName="date" [style.color]="secondaryColor">
+        </div>
+
+        <div class="habits-array" formArrayName="habits">
+          <h3>Habits</h3>
+          <div *ngFor="let habit of habits.controls; let i = index" class="habit-item" [formGroupName]="i">
+            <input formControlName="name" placeholder="Habit name" [style.color]="secondaryColor">
+            <button type="button" (click)="removeHabit(i)" class="remove-btn" [style.color]="secondaryColor">
+              <span class="material-icons">delete_forever</span>
+            </button>
+          </div>
+
+          <button type="button" (click)="addHabit()" class="add-btn" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+            <span class="material-icons">add_circle</span> Add Habit
+          </button>
+        </div>
+
+        <button type="submit" class="update-btn" [disabled]="isLoading || habitForm.invalid" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+          <span *ngIf="isLoading" class="spinner"></span>
+          {{ isLoading ? 'Saving...' : 'Save Today' }}
+        </button>
+      </form>
+
+      <div class="stats-container">
+        <div class="insights-section" *ngIf="aiInsights.length">
+          <h3>AI Insights</h3>
+          <div *ngFor="let insight of aiInsights" class="insight-card">
+            <span class="material-icons insight-icon">auto_awesome</span>
+            <p>{{ insight }}</p>
+          </div>
+        </div>
+
+        <div class="progress-section" *ngIf="habitEntries.length">
+          <h3>Today's Progress</h3>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width]="todayProgress + '%'" [style.background-color]="secondaryColor"></div>
+          </div>
+          <p class="progress-text">{{ todayProgress }}% completed today</p>
+        </div>
+
+        <div class="streaks-section" *ngIf="habitStreaks.length">
+          <h3>Streaks</h3>
+          <div *ngFor="let streak of habitStreaks" class="streak-card">
+            <h4>{{ streak.name }}</h4>
+            <p>Current: <span class="streak-number">{{ streak.currentStreak }} days</span></p>
+            <p>Best: <span class="streak-number">{{ streak.longestStreak }} days</span></p>
+          </div>
+        </div>
+      </div>
+
+      <button (click)="resetHabits()" class="reset-btn" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+        Reset All Habits
+      </button>
+    </div>
+
+    <div class="right-column">
+      <div class="entries-header">
+        <h3>Habit History</h3>
+        <span class="entries-count" *ngIf="habitEntries.length">{{ habitEntries.length }} entries</span>
+      </div>
+      
+      <div class="entries-container" *ngIf="habitEntries.length">
+        <div class="entries-list">
+          <div *ngIf="isLoading" class="loading">Loading...</div>
+          <div *ngFor="let entry of habitEntries; let entryIdx = index" class="entry-card">
+            <h4>{{ entry.date }}</h4>
+            <ul>
+              <li *ngFor="let habit of entry.habits; let habitIdx = index" class="habit-check">
+                <input type="checkbox" [checked]="habit.completed" (change)="toggleCompleted(entryIdx, habitIdx)">
+                <span [class.completed]="habit.completed">{{ habit.name }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div *ngIf="!habitEntries.length && !isLoading" class="empty-state">
+        <p>No habits tracked yet. Start by adding some habits above!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Save Notification -->
+  <div class="save-notification" *ngIf="showSaveNotification">
+    <span class="material-icons">check_circle</span>
+    Saved successfully!
+  </div>
+</div>

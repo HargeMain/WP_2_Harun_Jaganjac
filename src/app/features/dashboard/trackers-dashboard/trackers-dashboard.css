@@ -1,0 +1,381 @@
+.content {
+  flex: 1;
+  padding: 100px 30px 80px 30px;
+  overflow-y: auto;
+  transition: padding-left 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.content.drawer-open {
+  padding-left: 300px;
+}
+
+.slider-container {
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  padding: 20px 0;
+}
+
+.tracker-path {
+  margin-bottom: 40px;
+  padding: 0 60px;
+}
+
+.path-dots {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.path-dots::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(0,0,0,0.1);
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.path-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 3px solid;
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  transform: scale(1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
+.path-icon:hover {
+  transform: scale(1.15);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.path-icon.active {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 8px rgba(30, 58, 138, 0.2);
+}
+
+.path-icon .material-icons {
+  font-size: 28px;
+}
+
+.path-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.path-label {
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.5;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 5px 10px;
+  border-radius: 6px;
+  text-align: center;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.path-label:hover {
+  opacity: 0.8;
+  background: rgba(0,0,0,0.05);
+}
+
+.path-label.active {
+  opacity: 1;
+  font-weight: 800;
+  background: rgba(0,0,0,0.1);
+}
+
+.slider-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  overflow: visible; 
+}
+
+.slider-arrow {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.slider-arrow:hover:not(:disabled) {
+  transform: scale(1.1);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+.slider-arrow:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.slider-arrow .material-icons {
+  font-size: 32px;
+}
+
+.arrow-tooltip {
+  position: absolute;
+  top: -45px;
+  white-space: nowrap;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.slider-arrow:hover .arrow-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.left-arrow .arrow-tooltip {
+  left: 100%;
+  margin-left: 12px;
+  top: 50%;
+  transform: translateY(-50%) scale(0.95);
+}
+
+.left-arrow:hover .arrow-tooltip {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+}
+
+
+.right-arrow .arrow-tooltip {
+  right: 100%;
+  margin-right: 12px;
+  top: 50%;
+  transform: translateY(-50%) scale(0.95);
+}
+
+.right-arrow:hover .arrow-tooltip {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+}
+
+
+.trackers-slider {
+  flex: 1;
+  overflow: hidden;
+  border-radius: 24px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+}
+
+.slider-track {
+  display: flex;
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.slider-slide {
+  flex: 0 0 100%;
+  min-width: 100%;
+  opacity: 0.3;
+  transform: scale(0.95);
+  transition: all 0.5s ease;
+  padding: 20px;
+}
+
+.slider-slide.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.tracker-card {
+  opacity: 1;
+  transform: none;
+  animation: none;
+}
+
+.slide-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 40px;
+}
+
+.indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.indicator:hover {
+  transform: scale(1.3);
+}
+
+.indicator.active {
+  transform: scale(1.5);
+  box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.3);
+}
+
+/* Current Tracker Info */
+.current-tracker-info {
+  text-align: center;
+  margin-top: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.tracker-counter {
+  font-size: 16px;
+  font-weight: 700;
+  opacity: 0.7;
+}
+
+.tracker-name {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  margin-bottom: 5px;
+}
+
+.tracker-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid;
+  margin-top: 5px;
+}
+
+.tracker-icon .material-icons {
+  font-size: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .content.drawer-open {
+    padding-left: 0;
+  }
+  
+  .slider-container {
+    padding: 10px 0;
+  }
+  
+  .tracker-path {
+    padding: 0 30px;
+    margin-bottom: 30px;
+  }
+  
+  .path-icon {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .path-icon .material-icons {
+    font-size: 24px;
+  }
+  
+  .path-label {
+    font-size: 12px;
+    max-width: 100px;
+  }
+  
+  .slider-arrow {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .slider-slide {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 100px 15px 80px 15px;
+  }
+  
+  .slider-wrapper {
+    gap: 10px;
+  }
+  
+  .slider-arrow {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .slider-arrow .material-icons {
+    font-size: 28px;
+  }
+  
+  .tracker-path {
+    display: none;
+  }
+  
+  .current-tracker-info {
+    margin-top: 30px;
+  }
+  
+  .tracker-name {
+    font-size: 20px;
+  }
+  
+  .tracker-icon {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* Keyboard Navigation Hint */
+.keyboard-hint {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+  opacity: 0.6;
+  color: inherit;
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.slider-slide.active {
+  animation: fadeSlide 0.5s ease-out;
+}

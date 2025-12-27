@@ -1,0 +1,205 @@
+<div class="sleep-tracker-container" [style.background-color]="primaryColor" [style.color]="secondaryColor">
+  <div class="header-section">
+    <span class="material-icons tracker-icon" [style.color]="secondaryColor">bed</span>
+    <h2 class="title">Sleep Tracker</h2>
+  </div>
+
+  <div class="sleep-main-layout">
+    <div class="left-column">
+      <form [formGroup]="sleepForm" (ngSubmit)="onSubmit()" class="sleep-form">
+        <div class="input-group">
+          <label>Date</label>
+          <input type="date" formControlName="date" [style.color]="secondaryColor">
+        </div>
+
+        <div class="table-wrapper" formArrayName="sessions">
+          <h3>Today's Sleep</h3>
+          <table class="sleep-table">
+            <thead>
+              <tr>
+                <th>Sleep Time</th>
+                <th>Wake Time</th>
+                <th>Duration</th>
+                <th>Quality</th>
+                <th class="center"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let session of sessions.controls; let i = index" [formGroupName]="i">
+                <td>
+                  <input type="time" formControlName="sleepTime" (change)="calculateDurationFromTimes()" [style.color]="secondaryColor">
+                </td>
+                <td>
+                  <input type="time" formControlName="wakeTime" (change)="calculateDurationFromTimes()" [style.color]="secondaryColor">
+                </td>
+                <td>
+                  <div class="duration-input">
+                    <input type="number" formControlName="duration" step="0.5" min="1" max="24" [style.color]="secondaryColor">
+                    <span class="unit">hrs</span>
+                  </div>
+                </td>
+                <td>
+                  <select formControlName="quality" [style.color]="secondaryColor">
+                    <option [value]="1">★☆☆☆☆ (Poor)</option>
+                    <option [value]="2">★★☆☆☆ (Fair)</option>
+                    <option [value]="3">★★★☆☆ (Good)</option>
+                    <option [value]="4">★★★★☆ (Very Good)</option>
+                    <option [value]="5">★★★★★ (Excellent)</option>
+                  </select>
+                </td>
+                <td class="center">
+                  <button type="button" (click)="removeSleepSession(i)" class="remove-btn" [style.color]="secondaryColor">
+                    <span class="material-icons">delete_forever</span>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <button type="button" (click)="addSleepSession()" class="add-btn" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+            <span class="material-icons">add_circle</span>
+            Add Sleep Session
+          </button>
+        </div>
+
+        <button type="submit" class="update-btn" [disabled]="sleepForm.invalid || isLoading" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+          <span *ngIf="isLoading" class="spinner"></span>
+          {{ isLoading ? 'Saving...' : 'Save Sleep Data' }}
+        </button>
+      </form>
+
+      <div class="stats-container">
+        <div class="insights-section" *ngIf="aiInsights.length">
+          <h3>Sleep Insights</h3>
+          <div *ngFor="let insight of aiInsights" class="insight-card" [class]="insight.type">
+            <span class="material-icons insight-icon">auto_awesome</span>
+            <p>{{ insight.message }}</p>
+          </div>
+        </div>
+
+        <div class="progress-section" *ngIf="sleepEntries.length">
+          <h3>Today's Sleep Progress</h3>
+          <div class="progress-info">
+            <span class="sleep-time">{{ todaySleepDuration | number:'1.1-1' }} / {{ dailySleepGoal }} hrs</span>
+            <span class="sleep-percentage">{{ sleepProgress | number:'1.0-0' }}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width]="sleepProgress + '%'" [style.background-color]="secondaryColor"></div>
+          </div>
+          <p class="sleep-goal">Daily goal: {{ dailySleepGoal }} hours of quality sleep</p>
+        </div>
+
+        <div class="sleep-metrics" *ngIf="sleepEntries.length">
+          <h3>Sleep Analytics</h3>
+          <div class="metric-grid">
+            <div class="metric-card">
+              <span class="metric-value">{{ averageSleepDuration | number:'1.1-1' }}</span>
+              <span class="metric-label">Avg. Sleep Hours</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value">{{ averageSleepQuality | number:'1.1-1' }}</span>
+              <span class="metric-label">Avg. Quality (/5)</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value">{{ currentStreak }}</span>
+              <span class="metric-label">Day Streak</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value">{{ consistencyScore | number:'1.0-0' }}%</span>
+              <span class="metric-label">Consistency</span>
+            </div>
+          </div>
+          
+          <div class="sleep-stages" *ngIf="deepSleepHours > 0 && remSleepHours > 0">
+            <h4>Sleep Stages (Estimated)</h4>
+            <div class="stages-container">
+              <div class="stage deep-sleep">
+                <div class="stage-label">Deep Sleep</div>
+                <div class="stage-hours">{{ deepSleepHours | number:'1.1-1' }} hrs</div>
+              </div>
+              <div class="stage rem-sleep">
+                <div class="stage-label">REM Sleep</div>
+                <div class="stage-hours">{{ remSleepHours | number:'1.1-1' }} hrs</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button (click)="resetSleepTracker()" class="reset-btn" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+        Reset Sleep Tracker
+      </button>
+    </div>
+
+    <div class="right-column">
+      <div class="entries-header">
+        <h3>Sleep History</h3>
+        <span class="entries-count" *ngIf="sleepEntries.length">Showing {{ getDisplayedEntries().length }} of {{ sleepEntries.length }} sessions</span>
+      </div>
+      
+      <div class="entries-container" *ngIf="sleepEntries.length">
+        <table class="entries-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Sleep Time</th>
+              <th>Wake Time</th>
+              <th>Duration</th>
+              <th>Quality</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let session of getDisplayedEntries()">
+              <td>{{ session.date }}</td>
+              <td>{{ session.sleepTime }}</td>
+              <td>{{ session.wakeTime }}</td>
+              <td>
+                <span class="duration-badge">{{ session.duration | number:'1.1-1' }} hrs</span>
+              </td>
+              <td>
+                <span class="quality-stars" [style.color]="getQualityColor(session.quality)">
+                  {{ getQualityStars(session.quality) }}
+                </span>
+              </td>
+              <td>
+                <span class="session-notes" *ngIf="session.notes">{{ session.notes }}</span>
+                <span class="no-notes" *ngIf="!session.notes">-</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="pagination" *ngIf="totalPages > 1">
+          <button class="pagination-button" (click)="previousPage()" [disabled]="currentPage === 1">
+            <span class="material-icons">chevron_left</span>
+          </button>
+          
+          <button *ngFor="let page of getPageNumbers()" 
+                  class="pagination-button" 
+                  [class.active]="page === currentPage"
+                  (click)="goToPage(page)">
+            {{ page }}
+          </button>
+          
+          <button class="pagination-button" (click)="nextPage()" [disabled]="currentPage === totalPages">
+            <span class="material-icons">chevron_right</span>
+          </button>
+          
+          <span class="pagination-info">
+            Page {{ currentPage }} of {{ totalPages }}
+          </span>
+        </div>
+      </div>
+      
+      <div *ngIf="!sleepEntries.length && !isLoading" class="empty-state">
+        <p>No sleep data tracked yet. Start by adding your sleep sessions above!</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="save-notification" *ngIf="showSaveNotification">
+    <span class="material-icons">check_circle</span>
+    Sleep data saved successfully!
+  </div>
+</div>

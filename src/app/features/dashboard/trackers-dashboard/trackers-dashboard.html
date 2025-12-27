@@ -1,0 +1,168 @@
+<div class="main-container">
+
+  <app-drawer-menu
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [role]="role"
+    (drawerStateChange)="onDrawerStateChange($event)"
+  ></app-drawer-menu>
+
+  <app-header
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [role]="role"
+    [isDrawerOpen]="isDrawerOpen"
+  ></app-header>
+
+  <div
+    class="content"
+    [class.drawer-open]="isDrawerOpen"
+    [style.background-color]="secondaryColor"
+  >
+
+    <div class="slider-container"
+         (touchstart)="onTouchStart($event)"
+         (touchend)="onTouchEnd($event)">
+      
+      <div class="tracker-path" [style.color]="primaryColor">
+        <div class="path-dots">
+          <span 
+            *ngFor="let tracker of trackers; let i = index"
+            class="path-icon"
+            [class.active]="i === currentIndex"
+            [class.completed]="i < currentIndex"
+            (click)="goToTracker(i)"
+            [style.background-color]="i === currentIndex ? primaryColor : 'transparent'"
+            [style.color]="i === currentIndex ? secondaryColor : primaryColor"
+            [style.border-color]="primaryColor">
+            <span class="material-icons">{{ tracker.icon }}</span>
+          </span>
+        </div>
+        <div class="path-labels">
+          <span *ngFor="let tracker of trackers; let i = index" 
+                class="path-label"
+                [class.active]="i === currentIndex"
+                (click)="goToTracker(i)">
+            {{ tracker.name }}
+          </span>
+        </div>
+      </div>
+
+      <div class="slider-wrapper">
+        <button 
+          class="slider-arrow left-arrow"
+          (click)="prevTracker()"
+          [disabled]="isFirst || isAnimating"
+          [style.background-color]="primaryColor"
+          [style.color]="secondaryColor"
+          [style.opacity]="isFirst ? '0.5' : '1'"
+          [style.cursor]="isFirst ? 'not-allowed' : 'pointer'">
+          
+          <span class="material-icons">chevron_left</span>
+          <div class="arrow-tooltip" *ngIf="!isFirst" [style.background-color]="primaryColor" [style.color]="secondaryColor">
+            Previous: {{ prevTrackerName }}
+          </div>
+        </button>
+
+        <div class="trackers-slider">
+          <div class="slider-track" [style.transform]="'translateX(-' + (currentIndex * 100) + '%)'">
+            <div 
+              *ngFor="let tracker of trackers" 
+              class="slider-slide"
+              [class.active]="trackers[currentIndex].id === tracker.id">
+              
+              <div class="tracker-card" appLazyLoad (visible)="tracker.visible = true">
+                <ng-container [ngSwitch]="tracker.id">
+                  <ng-container *ngSwitchCase="'habit'">
+                    <app-habit-tracker
+                      *ngIf="tracker.visible"
+                      [primaryColor]="primaryColor"
+                      [secondaryColor]="secondaryColor">
+                    </app-habit-tracker>
+                  </ng-container>
+                  
+                  <ng-container *ngSwitchCase="'meal'">
+                    <app-meal-tracker
+                      *ngIf="tracker.visible"
+                      [primaryColor]="primaryColor"
+                      [secondaryColor]="secondaryColor">
+                    </app-meal-tracker>
+                  </ng-container>
+                  
+                  <ng-container *ngSwitchCase="'study'">
+                    <app-study-planner
+                      *ngIf="tracker.visible"
+                      [primaryColor]="primaryColor"
+                      [secondaryColor]="secondaryColor">
+                    </app-study-planner>
+                  </ng-container>
+
+                   <ng-container *ngSwitchCase="'sleep'">
+                    <app-sleep-tracker
+                      *ngIf="tracker.visible"
+                      [primaryColor]="primaryColor"
+                      [secondaryColor]="secondaryColor">
+                    </app-sleep-tracker>
+                  </ng-container>
+                  
+                  <ng-container *ngSwitchCase="'yoga'">
+                    <app-yoga-fitness-planner
+                      *ngIf="tracker.visible"
+                      [primaryColor]="primaryColor"
+                      [secondaryColor]="secondaryColor">
+                    </app-yoga-fitness-planner>
+                  </ng-container>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button 
+          class="slider-arrow right-arrow"
+          (click)="nextTracker()"
+          [disabled]="isLast || isAnimating"
+          [style.background-color]="primaryColor"
+          [style.color]="secondaryColor"
+          [style.opacity]="isLast ? '0.5' : '1'"
+          [style.cursor]="isLast ? 'not-allowed' : 'pointer'">
+          
+          <span class="material-icons">chevron_right</span>
+          <div class="arrow-tooltip" *ngIf="!isLast" [style.background-color]="primaryColor" [style.color]="secondaryColor">
+            Next: {{ nextTrackerName }}
+          </div>
+        </button>
+      </div>
+
+      <div class="slide-indicators">
+        <button 
+          *ngFor="let tracker of trackers; let i = index"
+          class="indicator"
+          [class.active]="i === currentIndex"
+          (click)="goToTracker(i)"
+          [style.background-color]="i === currentIndex ? primaryColor : 'rgba(0,0,0,0.1)'">
+        </button>
+      </div>
+
+      <div class="current-tracker-info" [style.color]="primaryColor">
+        <span class="tracker-counter">
+          {{ currentIndex + 1 }} / {{ trackers.length }}
+        </span>
+        <span class="tracker-name">
+          {{ trackers[currentIndex].name }}
+        </span>
+        <span class="tracker-icon" [style.color]="primaryColor">
+          <span class="material-icons">{{ trackers[currentIndex].icon }}</span>
+        </span>
+      </div>
+    </div>
+
+  </div>
+
+  <app-footer
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [isDrawerOpen]="isDrawerOpen"
+  ></app-footer>
+
+</div>

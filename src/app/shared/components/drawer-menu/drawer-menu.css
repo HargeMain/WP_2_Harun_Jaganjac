@@ -137,7 +137,6 @@
   left: 18px;
 
   z-index: 2100; 
-  background: rgba(0,0,0,0.6);
   backdrop-filter: blur(6px);
 
   border: none;
@@ -146,7 +145,6 @@
   cursor: pointer;
 
   font-size: 26px;
-  color: white;
 
   transition: transform 0.25s ease, background 0.25s ease;
 }

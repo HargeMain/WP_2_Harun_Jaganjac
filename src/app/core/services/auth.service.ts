@@ -27,7 +27,10 @@ export class AuthService {
       throw new Error('Invalid email or password');
     }
 
-    return snap.docs[0].data();
+      return {
+    uid: snap.docs[0].id,     
+    ...snap.docs[0].data()
+  };
   }
 
   async register(user: AppUser) {

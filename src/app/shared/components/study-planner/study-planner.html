@@ -1,0 +1,122 @@
+<div class="study-planner-container" [style.background-color]="primaryColor" [style.color]="secondaryColor">
+  <div class="header-section">
+    <span class="material-icons tracker-icon" [style.color]="secondaryColor">school</span>
+    <h2 class="title">Study Planner</h2>
+  </div>
+
+  <div class="study-main-layout">
+    <div class="left-column">
+      <form [formGroup]="studyForm" (ngSubmit)="onSubmit()" class="study-form">
+        <div class="input-group">
+          <label>Date</label>
+          <input type="date" formControlName="date" [style.color]="secondaryColor">
+        </div>
+
+        <div class="study-array" formArrayName="studies">
+          <h3>Study Tasks</h3>
+
+          <div *ngFor="let study of studies.controls; let i = index" class="study-item" [formGroupName]="i">
+            <input formControlName="subject" placeholder="Subject / Topic" [style.color]="secondaryColor">
+            <input type="number" formControlName="duration" placeholder="Minutes" [style.color]="secondaryColor" min="1">
+            <button type="button" (click)="removeStudy(i)" class="remove-btn" [style.color]="secondaryColor">
+              <span class="material-icons">delete_forever</span>
+            </button>
+          </div>
+
+          <button type="button" (click)="addStudy()" class="add-btn" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+            <span class="material-icons">add_circle</span>
+            Add Study Task
+          </button>
+        </div>
+
+        <button type="submit" class="update-btn" [disabled]="studyForm.invalid || isLoading" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+          <span *ngIf="isLoading" class="spinner"></span>
+          {{ isLoading ? 'Saving...' : 'Save Study Session' }}
+        </button>
+      </form>
+
+      <div class="stats-container">
+        <div class="insights-section" *ngIf="aiInsights.length">
+          <h3>Study Insights</h3>
+          <div *ngFor="let insight of aiInsights" class="insight-card" [class]="insight.type">
+            <span class="material-icons insight-icon">auto_awesome</span>
+            <p>{{ insight.message }}</p>
+          </div>
+        </div>
+
+        <div class="progress-section" *ngIf="studyEntries.length">
+          <h3>Today's Study Progress</h3>
+          <div class="progress-info">
+            <span class="study-time">{{ todayStudyTime }} / {{ dailyStudyGoal }} min</span>
+            <span class="study-percentage">{{ studyProgress | number:'1.0-0' }}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width]="studyProgress + '%'" [style.background-color]="secondaryColor"></div>
+          </div>
+          <p class="study-goal">Daily goal: {{ dailyStudyGoal }} minutes</p>
+        </div>
+
+        <div class="focus-metrics" *ngIf="studyEntries.length">
+          <h3>Focus Metrics</h3>
+          <div class="metric-grid">
+            <div class="metric-card">
+              <span class="metric-value">{{ averageStudyTime | number:'1.0-0' }}</span>
+              <span class="metric-label">Avg. min/day</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value">{{ currentStreak }}</span>
+              <span class="metric-label">Day streak</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value">{{ completionRate | number:'1.0-0' }}%</span>
+              <span class="metric-label">Tasks done</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value">{{ focusedSubjects }}</span>
+              <span class="metric-label">Subjects</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button (click)="resetStudy()" class="reset-btn" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+        Reset Study Planner
+      </button>
+    </div>
+
+    <div class="right-column">
+      <div class="entries-header">
+        <h3>Study History</h3>
+        <span class="entries-count" *ngIf="studyEntries.length">{{ studyEntries.length }} sessions</span>
+      </div>
+      
+      <div class="entries-container" *ngIf="studyEntries.length">
+        <div class="entries-list">
+          <div *ngIf="isLoading" class="loading">Loading...</div>
+          <div *ngFor="let entry of studyEntries; let entryIdx = index" class="entry-card">
+            <div class="entry-header">
+              <h4>{{ entry.date }}</h4>
+              <span class="total-time">Total: {{ getTotalMinutes(entry.studies) }} min</span>
+            </div>
+            <ul>
+              <li *ngFor="let study of entry.studies; let studyIdx = index" class="study-check">
+                <input type="checkbox" [checked]="study.completed" (change)="toggleCompleted(entryIdx, studyIdx)">
+                <span [class.completed]="study.completed">{{ study.subject }}</span>
+                <span class="study-duration">{{ study.duration }} min</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div *ngIf="!studyEntries.length && !isLoading" class="empty-state">
+        <p>No study sessions tracked yet. Start by adding your study tasks above!</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="save-notification" *ngIf="showSaveNotification">
+    <span class="material-icons">check_circle</span>
+    Study session saved successfully!
+  </div>
+</div>

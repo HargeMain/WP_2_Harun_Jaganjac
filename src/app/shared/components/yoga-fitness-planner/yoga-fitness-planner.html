@@ -1,0 +1,182 @@
+<div class="yoga-fitness-container" [style.background-color]="primaryColor" [style.color]="secondaryColor">
+    <div class="header-section">
+        <span class="material-icons tracker-icon" [style.color]="secondaryColor">self_improvement</span>
+        <h2 class="title">Yoga & Fitness Planner</h2>
+    </div>
+
+    <div class="yoga-main-layout">
+        <div class="left-column">
+            <form [formGroup]="plannerForm" (ngSubmit)="onSubmit()" class="planner-form">
+                <div class="input-group">
+                    <label>Date</label>
+                    <input type="date" formControlName="date" [style.color]="secondaryColor">
+                </div>
+
+                <div class="table-wrapper" formArrayName="sessions">
+                    <h3>Today's Activities</h3>
+                    <table class="planner-table">
+                        <thead>
+                            <tr>
+                                <th class="center">Done</th>
+                                <th>Activity</th>
+                                <th>Type</th>
+                                <th>Minutes</th>
+                                <th class="center"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let session of sessions.controls; let i = index" [formGroupName]="i">
+                                <td class="center">
+                                    <input type="checkbox" formControlName="completed">
+                                </td>
+                                <td>
+                                    <input formControlName="activity" placeholder="Exercise / Pose" [style.color]="secondaryColor">
+                                </td>
+                                <td>
+                                    <select formControlName="type" [style.color]="secondaryColor">
+                                        <option value="Yoga">Yoga</option>
+                                        <option value="Fitness">Fitness</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="number" formControlName="duration" placeholder="min" [style.color]="secondaryColor" min="1">
+                                </td>
+                                <td class="center">
+                                    <button type="button" (click)="removeSession(i)" class="remove-btn" [style.color]="secondaryColor">
+                                        <span class="material-icons">delete_forever</span>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <button type="button" (click)="addSession()" class="add-btn" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+                        <span class="material-icons">add_circle</span>
+                        Add Activity
+                    </button>
+                </div>
+
+                <button type="submit" class="update-btn" [disabled]="plannerForm.invalid || isLoading" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+                    <span *ngIf="isLoading" class="spinner"></span>
+                    {{ isLoading ? 'Saving...' : 'Save Session' }}
+                </button>
+            </form>
+
+            <div class="stats-container">
+                <div class="insights-section" *ngIf="aiInsights.length">
+                    <h3>Wellness Insights</h3>
+                    <div *ngFor="let insight of aiInsights" class="insight-card" [class]="insight.type">
+                        <span class="material-icons insight-icon">auto_awesome</span>
+                        <p>{{ insight.message }}</p>
+                    </div>
+                </div>
+
+                <div class="progress-section" *ngIf="plannerEntries.length">
+                    <h3>Today's Activity Progress</h3>
+                    <div class="progress-info">
+                        <span class="workout-time">{{ todayYogaTime + todayFitnessTime }} / {{ dailyWorkoutGoal }} min</span>
+                        <span class="workout-percentage">{{ workoutProgress | number:'1.0-0' }}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" [style.width]="workoutProgress + '%'" [style.background-color]="secondaryColor"></div>
+                    </div>
+                    <p class="workout-goal">Daily goal: {{ dailyWorkoutGoal }} minutes (Yoga: {{ todayYogaTime }}, Fitness: {{ todayFitnessTime }})</p>
+                </div>
+
+                <div class="activity-metrics" *ngIf="plannerEntries.length">
+                    <h3>Activity Metrics</h3>
+                    <div class="metric-grid">
+                        <div class="metric-card">
+                            <span class="metric-value">{{ totalYogaTime | number:'1.0-0' }}</span>
+                            <span class="metric-label">Yoga Minutes</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">{{ totalFitnessTime | number:'1.0-0' }}</span>
+                            <span class="metric-label">Fitness Minutes</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">{{ currentStreak }}</span>
+                            <span class="metric-label">Day Streak</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">{{ completionRate | number:'1.0-0' }}%</span>
+                            <span class="metric-label">Activities Done</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button (click)="resetPlanner()" class="reset-btn" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+                Reset All Activities
+            </button>
+        </div>
+
+        <div class="right-column">
+            <div class="entries-header">
+                <h3>Activity History</h3>
+                <span class="entries-count" *ngIf="plannerEntries.length">Showing {{ getDisplayedEntries().length }} of {{ plannerEntries.length }} sessions</span>
+            </div>
+            
+            <div class="entries-container" *ngIf="plannerEntries.length">
+                <table class="entries-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Activity</th>
+                            <th>Type</th>
+                            <th>Minutes</th>
+                            <th class="center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let session of getDisplayedEntries()">
+                            <td>{{ session.date }}</td>
+                            <td>{{ session.activity }}</td>
+                            <td>
+                                <span class="session-type" [class.type-yoga]="session.type === 'Yoga'" [class.type-fitness]="session.type === 'Fitness'">
+                                    {{ session.type }}
+                                </span>
+                            </td>
+                            <td>{{ session.duration }} min</td>
+                            <td class="center">
+                                <span [class.status-done]="session.completed" [class.status-pending]="!session.completed">
+                                    {{ session.completed ? '✓' : '○' }}
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="pagination" *ngIf="totalPages > 1">
+                    <button class="pagination-button" (click)="previousPage()" [disabled]="currentPage === 1">
+                        <span class="material-icons">chevron_left</span>
+                    </button>
+                    
+                    <button *ngFor="let page of getPageNumbers()" 
+                                    class="pagination-button" 
+                                    [class.active]="page === currentPage"
+                                    (click)="goToPage(page)">
+                        {{ page }}
+                    </button>
+                    
+                    <button class="pagination-button" (click)="nextPage()" [disabled]="currentPage === totalPages">
+                        <span class="material-icons">chevron_right</span>
+                    </button>
+                    
+                    <span class="pagination-info">
+                        Page {{ currentPage }} of {{ totalPages }}
+                    </span>
+                </div>
+            </div>
+            
+            <div *ngIf="!plannerEntries.length && !isLoading" class="empty-state">
+                <p>No activities tracked yet. Start by adding your yoga or fitness sessions above!</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="save-notification" *ngIf="showSaveNotification">
+        <span class="material-icons">check_circle</span>
+        Activities saved successfully!
+    </div>
+</div>
