@@ -156,170 +156,190 @@
                             <span class="metric-value">{{ streakDays }}</span>
                             <span class="metric-label">Day Streak</span>
                         </div>
-                        <div class="metric-card"></div>
-                            <span class="metric-value">{{ emotionalBalance.toFixed(0) }}%</span>
-                            <span class="metric-label">Positive Balance</span>
-                        </div>
                         <div class="metric-card">
-                            <span class="metric-value">{{ moodConsistency.toFixed(0) }}%</span>
-                            <span class="metric-label">Consistency</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mood-patterns" *ngIf="moodPatterns.length">
-                    <h3><span class="material-icons">calendar_today</span> Weekly Patterns</h3>
-                    <div class="patterns-grid">
-                        <div *ngFor="let pattern of moodPatterns" class="pattern-day">
-                            <div class="pattern-day-label">{{ pattern.dayOfWeek }}</div>
-                            <div class="pattern-day-value">{{ pattern.count }}</div>
-                            <div class="pattern-mood">{{ pattern.averageMood.toFixed(1) }}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="emotion-distribution" *ngIf="emotionDistribution.length">
-                    <h3><span class="material-icons">pie_chart</span> Top Emotions</h3>
-                    <div class="emotion-list">
-                        <div *ngFor="let emotion of emotionDistribution" class="emotion-item">
-                            <span class="emotion-label">{{ emotion.emotion }}</span>
-                            <div class="emotion-bar">
-                                <div class="emotion-fill" [style.width]="emotion.percentage + '%'"></div>
-                            </div>
-                            <span class="emotion-percentage">{{ emotion.percentage.toFixed(0) }}%</span>
-                        </div>
-                    </div>
-                </div>
+        <!-- Mood Metrics -->
+        <div class="mood-metrics" *ngIf="moodEntries.length">
+          <h3><span class="material-icons">analytics</span> Mood Statistics</h3>
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-value">{{ averageMood.toFixed(1) }}</span>
+              <span class="metric-label">Average Mood</span>
             </div>
-
-            <button (click)="resetMoodTracker()" class="reset-btn" [style.background-color]="secondaryColor" [style.color]="primaryColor">
-                Reset Mood Tracker
-            </button>
+            <div class="metric-card">
+              <span class="metric-value">{{ streakDays }}</span>
+              <span class="metric-label">Day Streak</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value">{{ emotionalBalance.toFixed(0) }}%</span>
+              <span class="metric-label">Positive Balance</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value">{{ moodConsistency.toFixed(0) }}%</span>
+              <span class="metric-label">Consistency</span>
+            </div>
+          </div>
         </div>
 
-        <div class="right-column">
-            <div class="filter-bar">
-                <div class="filter-group">
-                    <label>Time Range:</label>
-                    <select [(ngModel)]="filterDateRange" (change)="filterEntries()" class="filter-select" [style.color]="primaryColor">
-                        <option value="all">All Time</option>
-                        <option value="week">Last Week</option>
-                        <option value="month">Last Month</option>
-                        <option value="quarter">Last 3 Months</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label>Mood Level:</label>
-                    <select [(ngModel)]="filterMoodRange" (change)="filterEntries()" class="filter-select" [style.color]="primaryColor">
-                        <option value="all">All Moods</option>
-                        <option value="low">Low (1-3)</option>
-                        <option value="medium">Medium (4-6)</option>
-                        <option value="high">High (7-10)</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label>Emotion:</label>
-                    <select [(ngModel)]="filterEmotion" (change)="filterEntries()" class="filter-select" [style.color]="primaryColor">
-                        <option value="all">All Emotions</option>
-                        <option *ngFor="let emotion of emotionOptions" [value]="emotion">
-                            {{ emotion }}
-                        </option>
-                    </select>
-                </div>
+        <!-- Mood Patterns -->
+        <div class="mood-patterns" *ngIf="moodPatterns.length">
+          <h3><span class="material-icons">calendar_today</span> Weekly Patterns</h3>
+          <div class="patterns-grid">
+            <div *ngFor="let pattern of moodPatterns" class="pattern-day">
+              <div class="pattern-day-label">{{ pattern.dayOfWeek }}</div>
+              <div class="pattern-day-value">{{ pattern.count }}</div>
+              <div class="pattern-mood">{{ pattern.averageMood.toFixed(1) }}</div>
             </div>
-
-            <div class="entries-header">
-                <h3>Mood History</h3>
-                <span class="entries-count" *ngIf="moodEntries.length">
-                    {{ moodEntries.length }} entries
-                </span>
-            </div>
-            
-            <div class="entries-container" *ngIf="moodEntries.length">
-                <table class="mood-table">
-                    <thead>
-                        <tr>
-                            <th>Date & Time</th>
-                            <th>Mood</th>
-                            <th>Emotion</th>
-                            <th>Intensity</th>
-                            <th>Energy</th>
-                            <th>Sleep</th>
-                            <th>Factors</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let entry of getDisplayedEntries()">
-                            <td>
-                                <div>{{ entry.date }}</div>
-                                <div style="font-size: 12px; opacity: 0.7;">{{ entry.time }}</div>
-                            </td>
-                            <td>
-                                <div class="mood-column">
-                                    <span class="mood-emoji-small">{{ entry.moodEmoji }}</span>
-                                    <div class="mood-info">
-                                        <span class="mood-level">{{ entry.mood }}/10</span>
-                                        <span class="mood-description">{{ getMoodLabel(entry.mood) }}</span>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="emotion-tag">{{ entry.emotion }}</span>
-                            </td>
-                            <td>
-                                <span class="intensity-display">{{ getIntensityLabel(entry.intensity) }}</span>
-                            </td>
-                            <td>
-                                {{ entry.energyLevel }}/10
-                                <div style="font-size: 11px; opacity: 0.7;">{{ getEnergyLabel(entry.energyLevel) }}</div>
-                            </td>
-                            <td>{{ entry.sleepHours }}h</td>
-                            <td>
-                                <div class="factors-display">
-                                    <span *ngFor="let factor of entry.factors.slice(0, 3)" class="factor-tag">
-                                        {{ factor }}
-                                    </span>
-                                    <span *ngIf="entry.factors.length > 3" class="factor-tag">
-                                        +{{ entry.factors.length - 3 }}
-                                    </span>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <div class="pagination" *ngIf="totalPages > 1">
-                    <button class="pagination-button" (click)="previousPage()" [disabled]="currentPage === 1">
-                        <span class="material-icons">chevron_left</span>
-                    </button>
-                    
-                    <button *ngFor="let page of getPageNumbers()" 
-                                    class="pagination-button" 
-                                    [class.active]="page === currentPage"
-                                    (click)="goToPage(page)">
-                        {{ page }}
-                    </button>
-                    
-                    <button class="pagination-button" (click)="nextPage()" [disabled]="currentPage === totalPages">
-                        <span class="material-icons">chevron_right</span>
-                    </button>
-                    
-                    <span class="pagination-info">
-                        Page {{ currentPage }} of {{ totalPages }}
-                    </span>
-                </div>
-            </div>
-            
-            <div *ngIf="!moodEntries.length && !isLoading" class="empty-state">
-                <p>No mood entries yet. Start by logging your current mood above!</p>
-            </div>
+          </div>
         </div>
+
+        <!-- Emotion Distribution -->
+        <div class="emotion-distribution" *ngIf="emotionDistribution.length">
+          <h3><span class="material-icons">pie_chart</span> Top Emotions</h3>
+          <div class="emotion-list">
+            <div *ngFor="let emotion of emotionDistribution" class="emotion-item">
+              <span class="emotion-label">{{ emotion.emotion }}</span>
+              <div class="emotion-bar">
+                <div class="emotion-fill" [style.width]="emotion.percentage + '%'"></div>
+              </div>
+              <span class="emotion-percentage">{{ emotion.percentage.toFixed(0) }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reset Button -->
+      <button (click)="resetMoodTracker()" class="reset-btn" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+        Reset Mood Tracker
+      </button>
     </div>
 
-    <div class="save-notification" *ngIf="showSaveNotification">
-        <span class="material-icons">check_circle</span>
-        Mood saved successfully!
+    <!-- Right Column - Entries Table -->
+    <div class="right-column">
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label>Time Range:</label>
+          <select [(ngModel)]="filterDateRange" (change)="filterEntries()" class="filter-select" [style.color]="primaryColor">
+            <option value="all">All Time</option>
+            <option value="week">Last Week</option>
+            <option value="month">Last Month</option>
+            <option value="quarter">Last 3 Months</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label>Mood Level:</label>
+          <select [(ngModel)]="filterMoodRange" (change)="filterEntries()" class="filter-select" [style.color]="primaryColor">
+            <option value="all">All Moods</option>
+            <option value="low">Low (1-3)</option>
+            <option value="medium">Medium (4-6)</option>
+            <option value="high">High (7-10)</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label>Emotion:</label>
+          <select [(ngModel)]="filterEmotion" (change)="filterEntries()" class="filter-select" [style.color]="primaryColor">
+            <option value="all">All Emotions</option>
+            <option *ngFor="let emotion of emotionOptions" [value]="emotion">
+              {{ emotion }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="entries-header">
+        <h3>Mood History</h3>
+        <span class="entries-count" *ngIf="moodEntries.length">
+          {{ moodEntries.length }} entries
+        </span>
+      </div>
+      
+      <div class="entries-container" *ngIf="moodEntries.length">
+        <table class="mood-table">
+          <thead>
+            <tr>
+              <th>Date & Time</th>
+              <th>Mood</th>
+              <th>Emotion</th>
+              <th>Intensity</th>
+              <th>Energy</th>
+              <th>Sleep</th>
+              <th>Factors</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let entry of getDisplayedEntries()">
+              <td>
+                <div>{{ entry.date }}</div>
+                <div style="font-size: 12px; opacity: 0.7;">{{ entry.time }}</div>
+              </td>
+              <td>
+                <div class="mood-column">
+                  <span class="mood-emoji-small">{{ entry.moodEmoji }}</span>
+                  <div class="mood-info">
+                    <span class="mood-level">{{ entry.mood }}/10</span>
+                    <span class="mood-description">{{ getMoodLabel(entry.mood) }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="emotion-tag">{{ entry.emotion }}</span>
+              </td>
+              <td>
+                <span class="intensity-display">{{ getIntensityLabel(entry.intensity) }}</span>
+              </td>
+              <td>
+                {{ entry.energyLevel }}/10
+                <div style="font-size: 11px; opacity: 0.7;">{{ getEnergyLabel(entry.energyLevel) }}</div>
+              </td>
+              <td>{{ entry.sleepHours }}h</td>
+              <td>
+                <div class="factors-display">
+                  <span *ngFor="let factor of entry.factors.slice(0, 3)" class="factor-tag">
+                    {{ factor }}
+                  </span>
+                  <span *ngIf="entry.factors.length > 3" class="factor-tag">
+                    +{{ entry.factors.length - 3 }}
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div class="pagination" *ngIf="totalPages > 1">
+          <button class="pagination-button" (click)="previousPage()" [disabled]="currentPage === 1">
+            <span class="material-icons">chevron_left</span>
+          </button>
+          
+          <button *ngFor="let page of getPageNumbers()" 
+                  class="pagination-button" 
+                  [class.active]="page === currentPage"
+                  (click)="goToPage(page)">
+            {{ page }}
+          </button>
+          
+          <button class="pagination-button" (click)="nextPage()" [disabled]="currentPage === totalPages">
+            <span class="material-icons">chevron_right</span>
+          </button>
+          
+          <span class="pagination-info">
+            Page {{ currentPage }} of {{ totalPages }}
+          </span>
+        </div>
+      </div>
+      
+      <div *ngIf="!moodEntries.length && !isLoading" class="empty-state">
+        <p>No mood entries yet. Start by logging your current mood above!</p>
+      </div>
     </div>
+  </div>
+
+  <!-- Save Notification -->
+  <div class="save-notification" *ngIf="showSaveNotification">
+    <span class="material-icons">check_circle</span>
+    Mood saved successfully!
+  </div>
 </div>
