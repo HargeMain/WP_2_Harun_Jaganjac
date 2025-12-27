@@ -10,6 +10,9 @@ import { StudyPlannerComponent } from '../../../shared/components/study-planner/
 import { YogaFitnessPlannerComponent } from '../../../shared/components/yoga-fitness-planner/yoga-fitness-planner';
 import { LazyLoadDirective } from '../../../shared/directives/lazy-load';
 import { SleepTrackerComponent } from '../../../shared/components/sleep-tracker/sleep-tracker';
+import { TaskProjectPlannerComponent } from '../../../shared/components/task-project-planner/task-project-planner';
+import { MoodTrackerComponent } from '../../../shared/components/mood-tracker/mood-tracker';
+import { CalendarTrackerComponent } from '../../../shared/components/calendar-tracker/calendar-tracker';
 
 @Component({
   selector: 'app-trackers-dashboard',
@@ -24,6 +27,9 @@ import { SleepTrackerComponent } from '../../../shared/components/sleep-tracker/
     StudyPlannerComponent,
     YogaFitnessPlannerComponent,
     SleepTrackerComponent,
+    TaskProjectPlannerComponent,
+    MoodTrackerComponent,
+    CalendarTrackerComponent,
     LazyLoadDirective
   ],
   templateUrl: './trackers-dashboard.html',
@@ -50,6 +56,13 @@ export class TrackersDashboardComponent implements OnInit {
       component: MealTrackerComponent,
       visible: true 
     },
+    {
+      id: 'mood', 
+      name: 'Mood Tracker', 
+      icon: 'mood',
+      component: MoodTrackerComponent,
+      visible: true
+    },
     { 
       id: 'study', 
       name: 'Study Planner', 
@@ -70,6 +83,20 @@ export class TrackersDashboardComponent implements OnInit {
       icon: 'self_improvement',
       component: YogaFitnessPlannerComponent,
       visible: true 
+    },
+     { 
+      id: 'task', 
+      name: 'Task & Project Planner', 
+      icon: 'assignment',
+      component: TaskProjectPlannerComponent,
+      visible: true 
+    },
+    {
+      id: 'calendar',
+      name: 'Calendar Tracker',
+      icon: 'calendar_today',
+      component: CalendarTrackerComponent,
+      visible: true
     }
   ];
 

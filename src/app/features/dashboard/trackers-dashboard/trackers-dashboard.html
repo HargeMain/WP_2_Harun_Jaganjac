@@ -104,6 +104,22 @@
                       [secondaryColor]="secondaryColor">
                     </app-sleep-tracker>
                   </ng-container>
+
+                  <ng-container *ngSwitchCase="'mood'">
+                    <app-mood-tracker
+                      *ngIf="tracker.visible"
+                      [primaryColor]="primaryColor"
+                      [secondaryColor]="secondaryColor">
+                    </app-mood-tracker>
+                  </ng-container>
+                  
+                  <ng-container *ngSwitchCase="'calendar'">
+                    <app-calendar-tracker
+                      *ngIf="tracker.visible"
+                      [primaryColor]="primaryColor"
+                      [secondaryColor]="secondaryColor">
+                    </app-calendar-tracker>
+                  </ng-container>
                   
                   <ng-container *ngSwitchCase="'yoga'">
                     <app-yoga-fitness-planner
@@ -111,6 +127,13 @@
                       [primaryColor]="primaryColor"
                       [secondaryColor]="secondaryColor">
                     </app-yoga-fitness-planner>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="'task'">
+                    <app-task-project-planner
+                      *ngIf="tracker.visible"
+                      [primaryColor]="primaryColor"
+                      [secondaryColor]="secondaryColor">
+                    </app-task-project-planner>
                   </ng-container>
                 </ng-container>
               </div>

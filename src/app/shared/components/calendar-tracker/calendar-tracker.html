@@ -1,1 +1,384 @@
-<p>calendar-tracker works!</p>
+<div class="calendar-tracker-container" [style.background-color]="primaryColor" [style.color]="secondaryColor">
+    <div class="header-section">
+        <span class="material-icons tracker-icon" [style.color]="secondaryColor">calendar_today</span>
+        <h2 class="title">Calendar & Event Tracker</h2>
+    </div>
+
+    <div class="calendar-main-layout">
+        <div class="left-column">
+            <div class="forms-container">
+                <form [formGroup]="eventForm" (ngSubmit)="addEvent()" class="event-form">
+                    <div class="form-header">
+                        <span class="material-icons">event</span>
+                        <h3>New Event</h3>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Event Title</label>
+                        <input type="text" formControlName="title" placeholder="Enter event title" [style.color]="secondaryColor">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Description</label>
+                        <textarea formControlName="description" placeholder="Event description..." [style.color]="secondaryColor"></textarea>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Date</label>
+                            <input type="date" formControlName="date" [style.color]="secondaryColor">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>All Day</label>
+                            <div class="checkbox-container">
+                                <input type="checkbox" formControlName="isAllDay" id="allDay">
+                                <label for="allDay"></label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-row" *ngIf="!eventForm.get('isAllDay')?.value">
+                        <div class="input-group">
+                            <label>Start Time</label>
+                            <input type="time" formControlName="startTime" [style.color]="secondaryColor">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>End Time</label>
+                            <input type="time" formControlName="endTime" [style.color]="secondaryColor">
+                        </div>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Category</label>
+                            <select formControlName="category" [style.color]="primaryColor">
+                                <option value="work">Work</option>
+                                <option value="personal">Personal</option>
+                                <option value="meeting">Meeting</option>
+                                <option value="health">Health</option>
+                                <option value="social">Social</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>Priority</label>
+                            <select formControlName="priority" [style.color]="primaryColor">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Location</label>
+                        <input type="text" formControlName="location" placeholder="Meeting room, address, or online" [style.color]="secondaryColor">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Attendees (comma separated)</label>
+                        <input type="text" formControlName="attendees" placeholder="email1@example.com, email2@example.com" [style.color]="secondaryColor">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Notes</label>
+                        <textarea formControlName="notes" placeholder="Additional notes..." [style.color]="secondaryColor"></textarea>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Recurring</label>
+                            <select formControlName="recurring" [style.color]="primaryColor">
+                                <option value="none">None</option>
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="yearly">Yearly</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>Reminders</label>
+                            <select formControlName="reminders" multiple [style.color]="primaryColor">
+                                <option *ngFor="let reminder of reminders" [value]="reminder">
+                                    {{ reminder === 0 ? 'At time of event' : 
+                                         reminder === 1440 ? '1 day before' : 
+                                         reminder + ' minutes before' }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="update-btn" [disabled]="eventForm.invalid || isLoading" 
+                                    [style.background-color]="secondaryColor" [style.color]="primaryColor">
+                        <span *ngIf="isLoading" class="spinner"></span>
+                        {{ isLoading ? 'Creating...' : 'Add Event' }}
+                    </button>
+                </form>
+            </div>
+
+            <div class="stats-container">
+                <div class="insights-section" *ngIf="aiInsights.length">
+                    <h3>Schedule Insights</h3>
+                    <div *ngFor="let insight of aiInsights" class="insight-card" [class]="insight.type"></div>
+                        <span class="material-icons insight-icon">auto_awesome</span>
+                        <p>{{ insight.message }}</p>
+                    </div>
+                </div>
+
+                <div class="calendar-metrics">
+                    <h3>Calendar Metrics</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <span class="metric-value">{{ totalEvents }}</span>
+                            <span class="metric-label">Total Events</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">{{ eventsToday }}</span>
+                            <span class="metric-label">Today's Events</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">{{ eventsThisWeek }}</span>
+                            <span class="metric-label">This Week</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">{{ upcomingEvents }}</span>
+                            <span class="metric-label">Upcoming (7 days)</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">{{ busyDays }}</span>
+                            <span class="metric-label">Busy Days</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">{{ freeDays }}</span>
+                            <span class="metric-label">Free Days</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="time-distribution">
+                    <h3>Time Distribution</h3>
+                    <div class="distribution-grid">
+                        <div class="distribution-item">
+                            <div class="distribution-bar">
+                                <div class="distribution-fill" [style.width]="(meetingTime / totalEvents * 100) + '%'" 
+                                         style="background-color: #8b5cf6;"></div>
+                            </div>
+                            <span class="distribution-label">Meetings: {{ meetingTime }}</span>
+                        </div>
+                        <div class="distribution-item">
+                            <div class="distribution-bar">
+                                <div class="distribution-fill" [style.width]="(personalTime / totalEvents * 100) + '%'" 
+                                         style="background-color: #10b981;"></div>
+                            </div>
+                            <span class="distribution-label">Personal: {{ personalTime }}</span>
+                        </div>
+                    </div>
+                    <div class="efficiency-score">
+                        <span class="score-label">Schedule Efficiency</span>
+                        <div class="score-value">{{ scheduleEfficiency | number:'1.0-0' }}%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" [style.width]="scheduleEfficiency + '%'" [style.background-color]="secondaryColor"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button (click)="resetCalendar()" class="reset-btn" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+                Reset Calendar
+            </button>
+        </div>
+
+        <div class="right-column">
+            <div class="calendar-controls">
+                <div class="calendar-nav"></div>
+                    <button class="nav-btn" (click)="previousMonth()">
+                        <span class="material-icons">chevron_left</span>
+                    </button>
+                    <h3 class="month-title">
+                        {{ currentDate | date:'MMMM yyyy' }}
+                    </h3>
+                    <button class="nav-btn" (click)="nextMonth()">
+                        <span class="material-icons">chevron_right</span>
+                    </button>
+                    <button class="today-btn" (click)="goToToday()">
+                        Today
+                    </button>
+                </div>
+                
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <label>Category:</label>
+                        <select [(ngModel)]="filterCategory" (change)="filterEvents(); generateCalendar()" class="filter-select" [style.color]="primaryColor">
+                            <option value="all">All Categories</option>
+                            <option value="work">Work</option>
+                            <option value="personal">Personal</option>
+                            <option value="meeting">Meeting</option>
+                            <option value="health">Health</option>
+                            <option value="social">Social</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Priority:</label>
+                        <select [(ngModel)]="filterPriority" (change)="filterEvents(); generateCalendar()" class="filter-select" [style.color]="primaryColor">
+                            <option value="all">All Priorities</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Month:</label>
+                        <select [(ngModel)]="filterMonth" (change)="filterEvents()" class="filter-select" [style.color]="primaryColor">
+                            <option value="current">Current Month</option>
+                            <option value="next">Next Month</option>
+                            <option value="previous">Previous Month</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="view-toggle">
+                    <button class="view-btn" [class.active]="currentView === 'month'" (click)="currentView = 'month'">
+                        Month
+                    </button>
+                    <button class="view-btn" [class.active]="currentView === 'week'" (click)="currentView = 'week'">
+                        Week
+                    </button>
+                    <button class="view-btn" [class.active]="currentView === 'day'" (click)="currentView = 'day'">
+                        Day
+                    </button>
+                </div>
+            </div>
+
+            <div class="calendar-grid" *ngIf="currentView === 'month'">
+                <div class="calendar-header">
+                    <div class="day-header" *ngFor="let day of ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']">
+                        {{ day }}
+                    </div>
+                </div>
+                
+                <div class="calendar-body">
+                    <div class="calendar-day" *ngFor="let day of calendarDays" 
+                             [class.current-month]="day.isCurrentMonth"
+                             [class.today]="day.isToday"
+                             [class.selected]="day.date.toDateString() === selectedDate.toDateString()"
+                             (click)="selectDate(day.date)">
+                        
+                        <div class="day-header">
+                            <span class="day-number">{{ day.date.getDate() }}</span>
+                            <span class="events-count" *ngIf="day.events.length > 0">
+                                {{ day.events.length }}+
+                            </span>
+                        </div>
+                        
+                        <div class="day-events">
+                            <div class="day-event" *ngFor="let event of day.events"
+                                     [style.background-color]="getTimeSlotColor(event.category)"
+                                     [style.color]="'white'">
+                                <span class="material-icons event-icon">{{ getCategoryIcon(event.category) }}</span>
+                                <span class="event-title">{{ event.title }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="selected-day-section" *ngIf="currentView === 'month'">
+                <h3 class="selected-day-title">
+                    Events for {{ selectedDate | date:'fullDate' }}
+                    <span class="events-count-badge">{{ getEventsForSelectedDate().length }}</span>
+                </h3>
+                
+                <div class="events-container">
+                    <div *ngFor="let event of getEventsForSelectedDate()" class="event-card"
+                             [style.border-left-color]="getTimeSlotColor(event.category)">
+                        
+                        <div class="event-header">
+                            <div class="event-category">
+                                <span class="material-icons category-icon">{{ getCategoryIcon(event.category) }}</span>
+                                <span class="category-name">{{ event.category }}</span>
+                            </div>
+                            <span class="priority-badge" [class]="'priority-' + event.priority">
+                                {{ event.priority }}
+                            </span>
+                        </div>
+                        
+                        <div class="event-title">{{ event.title }}</div>
+                        <div class="event-time">
+                            <span class="material-icons">schedule</span>
+                            {{ event.isAllDay ? 'All Day' : event.startTime + ' - ' + event.endTime }}
+                        </div>
+                        
+                        <div class="event-location" *ngIf="event.location">
+                            <span class="material-icons">location_on</span>
+                            {{ event.location }}
+                        </div>
+                        
+                        <div class="event-actions">
+                            <button class="action-btn" (click)="updateEvent(event.id, { priority: 'high' })">
+                                <span class="material-icons">flag</span>
+                            </button>
+                            <button class="action-btn" (click)="deleteEvent(event.id)">
+                                <span class="material-icons">delete</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div *ngIf="getEventsForSelectedDate().length === 0" class="empty-day">
+                        <span class="material-icons">event_busy</span>
+                        <p>No events scheduled for this day</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="upcoming-events" *ngIf="filteredEvents.length">
+                <div class="entries-header">
+                    <h3>Upcoming Events</h3>
+                    <span class="entries-count">
+                        {{ filteredEvents.length }} total events
+                    </span>
+                </div>
+                
+                <div class="events-list">
+                    <div *ngFor="let event of filteredEvents.slice(0, 10)" class="upcoming-event">
+                        <div class="event-date">
+                         <div class="event-day">{{ event.date | date:'dd' }}</div>
+                         <div class="event-month">{{ event.date | date:'MMM' }}</div>
+                        </div>
+                        
+                        <div class="event-details">
+                            <div class="event-title">{{ event.title }}</div>
+                            <div class="event-category-badge" [style.background-color]="getTimeSlotColor(event.category)">
+                                {{ event.category }}
+                            </div>
+                            <div class="event-time">{{ event.startTime }} - {{ event.endTime }}</div>
+                        </div>
+                        
+                        <div class="event-actions">
+                            <button class="action-btn" (click)="deleteEvent(event.id)">
+                                <span class="material-icons">delete</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div *ngIf="!filteredEvents.length && !isLoading" class="empty-state">
+                <p>No events scheduled. Start by adding your first event!</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="save-notification" *ngIf="showSaveNotification">
+        <span class="material-icons">check_circle</span>
+        Event saved successfully!
+    </div>
+</div>

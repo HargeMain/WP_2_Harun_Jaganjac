@@ -1,1 +1,348 @@
-<p>task-project-planner works!</p>
+<div class="task-project-container" [style.background-color]="primaryColor" [style.color]="secondaryColor">
+    <div class="header-section">
+        <span class="material-icons tracker-icon" [style.color]="secondaryColor">assignment</span>
+        <h2 class="title">Task & Project Planner</h2>
+    </div>
+
+    <div class="task-main-layout">
+        <div class="left-column">
+            <div class="forms-container">
+                <form [formGroup]="projectForm" (ngSubmit)="addProject()" class="project-form">
+                    <div class="form-header">
+                        <span class="material-icons">folder</span>
+                        <h3>New Project</h3>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Project Name</label>
+                        <input type="text" formControlName="name" placeholder="Enter project name" [style.color]="secondaryColor">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Description</label>
+                        <textarea formControlName="description" placeholder="Project description..." [style.color]="secondaryColor"></textarea>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Start Date</label>
+                            <input type="date" formControlName="startDate" [style.color]="secondaryColor">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>End Date</label>
+                            <input type="date" formControlName="endDate" [style.color]="secondaryColor">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Status</label>
+                        <select formControlName="status" [style.color]="primaryColor">
+                            <option value="planning">Planning</option>
+                            <option value="active">Active</option>
+                            <option value="on-hold">On Hold</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="update-btn" [disabled]="projectForm.invalid || isLoading" 
+                                    [style.background-color]="secondaryColor" [style.color]="primaryColor">
+                        <span *ngIf="isLoading" class="spinner"></span>
+                        {{ isLoading ? 'Creating...' : 'Create Project' }}
+                    </button>
+                </form>
+
+                <form [formGroup]="taskForm" (ngSubmit)="addTask()" class="task-form">
+                    <div class="form-header">
+                        <span class="material-icons">task</span>
+                        <h3>New Task</h3>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Project</label>
+                        <select formControlName="projectId" [style.color]="primaryColor">
+                            <option value="">Select Project</option>
+                            <option *ngFor="let project of projects" [value]="project.id">
+                                {{ project.name }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Task Name</label>
+                        <input type="text" formControlName="name" placeholder="Enter task name" [style.color]="secondaryColor">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Description</label>
+                        <textarea formControlName="description" placeholder="Task description..." [style.color]="secondaryColor"></textarea>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Priority</label>
+                            <select formControlName="priority" [style.color]="primaryColor">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>Status</label>
+                            <select formControlName="status" [style.color]="secondaryColor">
+                                <option  [style.color]="primaryColor" value="todo">To Do</option>
+                                <option  [style.color]="primaryColor" value="in-progress">In Progress</option>
+                                <option  [style.color]="primaryColor" value="review">Review</option>
+                                <option  [style.color]="primaryColor" value="completed">Completed</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Due Date</label>
+                            <input type="date" formControlName="dueDate" [style.color]="secondaryColor">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>Est. Hours</label>
+                            <input type="number" formControlName="estimatedHours" step="0.5" min="0.5" [style.color]="secondaryColor">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Assigned To</label>
+                        <input type="text" formControlName="assignedTo" placeholder="Team member name" [style.color]="secondaryColor">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Tags</label>
+                        <div class="tags-container">
+                            <div class="tag-input-group" *ngFor="let tag of tags.controls; let i = index" [formGroupName]="'tags'">
+                                <input [formControlName]="i" placeholder="Add tag" [style.color]="secondaryColor">
+                                <button type="button" (click)="removeTag(i)" class="tag-btn">
+                                    <span class="material-icons">close</span>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" (click)="addTag()" class="add-btn" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+                            <span class="material-icons">add</span> Add Tag
+                        </button>
+                    </div>
+                    
+                    <button type="submit" class="update-btn" [disabled]="taskForm.invalid || isLoading" 
+                                    [style.background-color]="secondaryColor" [style.color]="primaryColor">
+                        <span *ngIf="isLoading" class="spinner"></span>
+                        {{ isLoading ? 'Creating...' : 'Create Task' }}
+                    </button>
+                </form>
+            </div>
+
+            <div class="stats-container">
+                <div class="insights-section" *ngIf="aiInsights.length">
+                    <h3>Project Insights</h3>
+                    <div *ngFor="let insight of aiInsights" class="insight-card" [class]="insight.type">
+                        <span class="material-icons insight-icon">auto_awesome</span>
+                        <p>{{ insight.message }}</p>
+                    </div>
+                </div>
+
+                <div class="project-metrics">
+                    <h3>Project Metrics</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <span class="metric-value">{{ totalProjects }}</span>
+                            <span class="metric-label">Total Projects</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">{{ activeProjects }}</span>
+                            <span class="metric-label">Active Projects</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">{{ totalTasks }}</span>
+                            <span class="metric-label">Total Tasks</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">{{ completedTasks }}</span>
+                            <span class="metric-label">Completed Tasks</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">{{ overdueTasks }}</span>
+                            <span class="metric-label">Overdue Tasks</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">{{ completionRate | number:'1.0-0' }}%</span>
+                            <span class="metric-label">Completion Rate</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="productivity-section">
+                    <h3>Productivity Score</h3>
+                    <span class="score-label">Based on completion, efficiency & progress</span>
+                    <div class="productivity-score" 
+                             [class.score-excellent]="productivityScore >= 80"
+                             [class.score-good]="productivityScore >= 60 && productivityScore < 80"
+                             [class.score-fair]="productivityScore >= 40 && productivityScore < 60"
+                             [class.score-poor]="productivityScore < 40">
+                        {{ productivityScore }}
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" [style.width]="productivityScore + '%'" [style.background-color]="secondaryColor"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button (click)="resetPlanner()" class="reset-btn" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+                Reset All Projects
+            </button>
+        </div>
+
+        <div class="right-column">
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label>Status:</label>
+                    <select [(ngModel)]="filterStatus" (change)="filterTasks()" class="filter-select" [style.color]="primaryColor">
+                        <option value="all">All Status</option>
+                        <option value="todo">To Do</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="review">Review</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Priority:</label>
+                    <select [(ngModel)]="filterPriority" (change)="filterTasks()" class="filter-select" [style.color]="primaryColor">
+                        <option value="all">All Priorities</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="urgent">Urgent</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Project:</label>
+                    <select [(ngModel)]="filterProject" (change)="filterTasks()" class="filter-select" [style.color]="primaryColor">
+                        <option value="all">All Projects</option>
+                        <option *ngFor="let project of projects" [value]="project.id">
+                            {{ project.name }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="entries-header">
+                <h3>Task Board</h3>
+                <span class="entries-count" *ngIf="filteredTasks.length">
+                    Showing {{ getDisplayedTasks().length }} of {{ filteredTasks.length }} tasks
+                </span>
+            </div>
+            
+            <div class="entries-container" *ngIf="filteredTasks.length">
+                <table class="tasks-table">
+                    <thead>
+                        <tr>
+                            <th>Task</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Project</th>
+                            <th>Due Date</th>
+                            <th>Hours</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let task of getDisplayedTasks()">
+                            <td>
+                                <div class="task-name">{{ task.name }}</div>
+                                <div class="task-assignee" *ngIf="task.assignedTo">
+                                    <small>👤 {{ task.assignedTo }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="priority-badge" [class]="'priority-' + task.priority">
+                                    {{ task.priority }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="status-badge" [class]="'status-' + task.status">
+                                    {{ task.status }}
+                                </span>
+                            </td>
+                            <td>{{ task.projectName }}</td>
+                            <td>
+                                {{ task.dueDate }}
+                                <div *ngIf="getDaysUntilDue(task.dueDate) <= 7 && getDaysUntilDue(task.dueDate) >= 0" 
+                                         class="due-soon">
+                                    ⏰ {{ getDaysUntilDue(task.dueDate) }} days
+                                </div>
+                                <div *ngIf="getDaysUntilDue(task.dueDate) < 0" class="overdue">
+                                    ⚠️ Overdue
+                                </div>
+                            </td>
+                            <td>
+                                <div class="hours-display">
+                                    <div class="hours-progress">
+                                        <div class="hours-fill" [style.width]="(task.actualHours / task.estimatedHours) * 100 + '%'"></div>
+                                    </div>
+                                    <span class="hours-text">{{ task.actualHours }}/{{ task.estimatedHours }}h</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn" (click)="updateTaskStatus(projects[0].id, task.id, 'in-progress')" 
+                                                    *ngIf="task.status === 'todo'">
+                                        <span class="material-icons">play_arrow</span>
+                                    </button>
+                                    <button class="action-btn" (click)="updateTaskStatus(projects[0].id, task.id, 'review')" 
+                                                    *ngIf="task.status === 'in-progress'">
+                                        <span class="material-icons">rate_review</span>
+                                    </button>
+                                    <button class="action-btn" (click)="updateTaskStatus(projects[0].id, task.id, 'completed')" 
+                                                    *ngIf="task.status !== 'completed'">
+                                        <span class="material-icons">check</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="pagination" *ngIf="totalPages > 1">
+                    <button class="pagination-button" (click)="previousPage()" [disabled]="currentPage === 1">
+                        <span class="material-icons">chevron_left</span>
+                    </button>
+                    
+                    <button *ngFor="let page of getPageNumbers()" 
+                                    class="pagination-button" 
+                                    [class.active]="page === currentPage"
+                                    (click)="goToPage(page)">
+                        {{ page }}
+                    </button>
+                    
+                    <button class="pagination-button" (click)="nextPage()" [disabled]="currentPage === totalPages">
+                        <span class="material-icons">chevron_right</span>
+                    </button>
+                    
+                    <span class="pagination-info">
+                        Page {{ currentPage }} of {{ totalPages }}
+                    </span>
+                </div>
+            </div>
+            
+            <div *ngIf="!filteredTasks.length && !isLoading" class="empty-state">
+                <p>No tasks found. Start by creating a project and adding tasks!</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="save-notification" *ngIf="showSaveNotification">
+        <span class="material-icons">check_circle</span>
+        Saved successfully!
+    </div>
+</div>
