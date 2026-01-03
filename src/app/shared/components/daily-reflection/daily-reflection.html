@@ -1,1 +1,651 @@
-<p>daily-reflection works!</p>
+<div class="daily-reflection-container" [style.background-color]="primaryColor" [style.color]="secondaryColor">
+    <div class="header-section">
+        <span class="material-icons tracker-icon" [style.color]="secondaryColor">psychology</span>
+        <h2 class="title">Daily Reflection Tracker</h2>
+    </div>
+
+    <div class="reflection-main-layout">
+        <div class="left-column">
+            <div class="forms-container">
+                <form [formGroup]="reflectionForm" (ngSubmit)="addReflection()" class="reflection-form">
+                    <div class="form-header">
+                        <span class="material-icons">edit_note</span>
+                        <h3>Daily Reflection</h3>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Date</label>
+                            <input type="date" formControlName="date" [style.color]="secondaryColor">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>Time of Day</label>
+                            <select formControlName="timeOfDay" [style.color]="primaryColor">
+                                <option *ngFor="let time of timesOfDay" [value]="time.value">
+                                    {{ time.label }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="ratings-section">
+                        <h4>How was your day?</h4>
+                        <div class="ratings-grid">
+                            <div class="rating-group">
+                                <label>Energy Level</label>
+                                <div class="rating-buttons">
+                                    <button *ngFor="let level of ratingOptions" 
+                                                 type="button"
+                                                 class="rating-btn" 
+                                                 [class.active]="reflectionForm.get('energyLevel')?.value === level"
+                                                 [style.background-color]="level === reflectionForm.get('energyLevel')?.value ? getRatingColor(level) : 'rgba(255,255,255,0.1)'"
+                                                 (click)="reflectionForm.patchValue({ energyLevel: level })">
+                                        {{ level }}
+                                    </button>
+                                </div>
+                                <div class="rating-label">{{ getRatingLabel(reflectionForm.get('energyLevel')?.value) }}</div>
+                            </div>
+                            
+                            <div class="rating-group">
+                                <label>Mood</label>
+                                <div class="mood-buttons">
+                                    <button *ngFor="let mood of moods" 
+                                                 type="button"
+                                                 class="mood-btn" 
+                                                 [class.active]="reflectionForm.get('mood')?.value === mood.value"
+                                                 [style.background-color]="mood.value === reflectionForm.get('mood')?.value ? mood.color : 'rgba(255,255,255,0.1)'"
+                                                 (click)="reflectionForm.patchValue({ mood: mood.value })">
+                                        {{ mood.emoji }}
+                                        <span class="mood-btn-label">{{ mood.label }}</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="rating-group">
+                                <label>Focus Level</label>
+                                <div class="rating-buttons">
+                                    <button *ngFor="let level of ratingOptions" 
+                                                 type="button"
+                                                 class="rating-btn" 
+                                                 [class.active]="reflectionForm.get('focusLevel')?.value === level"
+                                                 [style.background-color]="level === reflectionForm.get('focusLevel')?.value ? getRatingColor(level) : 'rgba(255,255,255,0.1)'"
+                                                 (click)="reflectionForm.patchValue({ focusLevel: level })">
+                                        {{ level }}
+                                    </button>
+                                </div>
+                                <div class="rating-label">{{ getRatingLabel(reflectionForm.get('focusLevel')?.value) }}</div>
+                            </div>
+                            
+                            <div class="rating-group">
+                                <label>Productivity</label>
+                                <div class="rating-buttons">
+                                    <button *ngFor="let level of ratingOptions" 
+                                                 type="button"
+                                                 class="rating-btn" 
+                                                 [class.active]="reflectionForm.get('productivityScore')?.value === level"
+                                                 [style.background-color]="level === reflectionForm.get('productivityScore')?.value ? getRatingColor(level) : 'rgba(255,255,255,0.1)'"
+                                                 (click)="reflectionForm.patchValue({ productivityScore: level })">
+                                        {{ level }}
+                                    </button>
+                                </div>
+                                <div class="rating-label">{{ getRatingLabel(reflectionForm.get('productivityScore')?.value) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="reflection-questions">
+                        <div class="question-section">
+                            <div class="question-header">
+                                <span class="material-icons">emoji_events</span>
+                                <h5>What went well today?</h5>
+                                <button type="button" class="add-item-btn" (click)="addWin()">
+                                    <span class="material-icons">add</span>
+                                </button>
+                            </div>
+                            <div *ngFor="let win of wins.controls; let i = index" class="question-item">
+                                <textarea [formControlName]="i" placeholder="Something positive that happened..." 
+                                                 rows="2" [style.color]="primaryColor"></textarea>
+                                <button *ngIf="wins.controls.length > 1" type="button" class="remove-item-btn" 
+                                                (click)="removeWin(i)">
+                                    <span class="material-icons">remove</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="question-section">
+                            <div class="question-header">
+                                <span class="material-icons">warning</span>
+                                <h5>Challenges faced</h5>
+                                <button type="button" class="add-item-btn" (click)="addChallenge()">
+                                    <span class="material-icons">add</span>
+                                </button>
+                            </div>
+                            <div *ngFor="let challenge of challenges.controls; let i = index" class="question-item">
+                                <textarea [formControlName]="i" placeholder="Something that was difficult..." 
+                                                 rows="2" [style.color]="primaryColor"></textarea>
+                                <button *ngIf="challenges.controls.length > 1" type="button" class="remove-item-btn" 
+                                                (click)="removeChallenge(i)">
+                                    <span class="material-icons">remove</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="question-section">
+                            <div class="question-header">
+                                <span class="material-icons">school</span>
+                                <h5>Lessons learned</h5>
+                                <button type="button" class="add-item-btn" (click)="addLesson()">
+                                    <span class="material-icons">add</span>
+                                </button>
+                            </div>
+                            <div *ngFor="let lesson of lessonsLearned.controls; let i = index" class="question-item">
+                                <textarea [formControlName]="i" placeholder="What did you learn today?" 
+                                                 rows="2" [style.color]="primaryColor"></textarea>
+                                <button *ngIf="lessonsLearned.controls.length > 1" type="button" class="remove-item-btn" 
+                                                (click)="removeLesson(i)">
+                                    <span class="material-icons">remove</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="question-section">
+                            <div class="question-header">
+                                <span class="material-icons">favorite</span>
+                                <h5>I'm grateful for...</h5>
+                                <button type="button" class="add-item-btn" (click)="addGratitude()">
+                                    <span class="material-icons">add</span>
+                                </button>
+                            </div>
+                            <div *ngFor="let gratitudeItem of gratitude.controls; let i = index" class="question-item">
+                                <textarea [formControlName]="i" placeholder="Something you're thankful for..." 
+                                                 rows="2" [style.color]="primaryColor"></textarea>
+                                <button *ngIf="gratitude.controls.length > 1" type="button" class="remove-item-btn" 
+                                                (click)="removeGratitude(i)">
+                                    <span class="material-icons">remove</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="question-section">
+                            <div class="question-header">
+                                <span class="material-icons">trending_up</span>
+                                <h5>What could I improve?</h5>
+                                <button type="button" class="add-item-btn" (click)="addImprovement()">
+                                    <span class="material-icons">add</span>
+                                </button>
+                            </div>
+                            <div *ngFor="let improvement of improvements.controls; let i = index" class="question-item">
+                                <textarea [formControlName]="i" placeholder="Areas for growth..." 
+                                                 rows="2" [style.color]="primaryColor"></textarea>
+                                <button *ngIf="improvements.controls.length > 1" type="button" class="remove-item-btn" 
+                                                (click)="removeImprovement(i)">
+                                    <span class="material-icons">remove</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="question-section">
+                            <div class="question-header">
+                                <span class="material-icons">flag</span>
+                                <h5>Goals for tomorrow</h5>
+                                <button type="button" class="add-item-btn" (click)="addGoal()">
+                                    <span class="material-icons">add</span>
+                                </button>
+                            </div>
+                            <div *ngFor="let goal of goalsForTomorrow.controls; let i = index" class="question-item">
+                                <textarea [formControlName]="i" placeholder="What do you want to achieve tomorrow?" 
+                                                 rows="2" [style.color]="primaryColor"></textarea>
+                                <button *ngIf="goalsForTomorrow.controls.length > 1" type="button" class="remove-item-btn" 
+                                                (click)="removeGoal(i)">
+                                    <span class="material-icons">remove</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="optional-details">
+                        <h5>Optional Details</h5>
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Location</label>
+                                <input type="text" formControlName="location" placeholder="Where are you?" [style.color]="secondaryColor">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Weather</label>
+                                <select formControlName="weather" [style.color]="primaryColor">
+                                    <option value="">Select weather</option>
+                                    <option value="sunny">Sunny</option>
+                                    <option value="cloudy">Cloudy</option>
+                                    <option value="rainy">Rainy</option>
+                                    <option value="snowy">Snowy</option>
+                                    <option value="windy">Windy</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Sleep (hours)</label>
+                                <input type="number" formControlName="sleepHours" min="0" max="24" step="0.5" [style.color]="secondaryColor">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Exercise (min)</label>
+                                <input type="number" formControlName="exerciseMinutes" min="0" max="300" [style.color]="secondaryColor">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Meditation (min)</label>
+                                <input type="number" formControlName="meditationMinutes" min="0" max="120" [style.color]="secondaryColor">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Tags</label>
+                        <div class="tags-container">
+                            <div class="tag-option" *ngFor="let tag of defaultTags" 
+                                     [class.selected]="reflectionForm.get('tags')?.value?.includes(tag)"
+                                     (click)="toggleTag(tag)">
+                                {{ tag }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="checkbox-container">
+                            <input type="checkbox" formControlName="isPrivate" id="privateReflection">
+                            <label for="privateReflection">Keep this reflection private</label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="update-btn" [disabled]="reflectionForm.invalid || isLoading" 
+                                    [style.background-color]="secondaryColor" [style.color]="primaryColor">
+                        <span *ngIf="isLoading" class="spinner"></span>
+                        {{ isLoading ? 'Saving...' : 'Save Reflection' }}
+                    </button>
+                </form>
+            </div>
+
+            <div class="stats-container">
+                <div class="insights-section" *ngIf="aiInsights.length">
+                    <h3>Reflection Insights</h3>
+                    <div *ngFor="let insight of aiInsights" class="insight-card" [class]="insight.type">
+                        <span class="material-icons insight-icon">auto_awesome</span>
+                        <p>{{ insight.message }}</p>
+                    </div>
+                </div>
+
+                <div class="reflection-metrics">
+                    <h3>Reflection Metrics</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <span class="metric-value">{{ totalEntries }}</span>
+                            <span class="metric-label">Total Days</span>
+                        </div>
+                        <div class="metric-card streak-card" [class.active-streak]="currentStreak > 0">
+                            <span class="metric-value streak-days">{{ currentStreak }}</span>
+                            <span class="metric-label">Day Streak</span>
+                            <span class="streak-subtext" *ngIf="longestStreak > 0">Best: {{ longestStreak }}</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">{{ averageMood | number:'1.1-1' }}</span>
+                            <span class="metric-label">Avg Mood</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">{{ averageProductivity | number:'1.1-1' }}</span>
+                            <span class="metric-label">Avg Productivity</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="category-breakdown">
+                    <div class="breakdown-column">
+                        <h4>Wins by Category</h4>
+                        <div class="category-list">
+                            <div *ngFor="let category of winCategories" class="category-item">
+                                <div class="category-header">
+                                    <span class="material-icons">{{ category.icon }}</span>
+                                    <span class="category-name">{{ category.category }}</span>
+                                    <span class="category-count">{{ category.count }}</span>
+                                </div>
+                                <div class="category-bar">
+                                    <div class="category-fill" [style.width]="category.percentage + '%'" 
+                                             [style.background-color]="getMoodColor('good')"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="breakdown-column">
+                        <h4>Challenges by Category</h4>
+                        <div class="category-list">
+                            <div *ngFor="let category of challengeCategories" class="category-item">
+                                <div class="category-header">
+                                    <span class="material-icons">{{ category.icon }}</span>
+                                    <span class="category-name">{{ category.category }}</span>
+                                    <span class="category-count">{{ category.count }}</span>
+                                </div>
+                                <div class="category-bar">
+                                    <div class="category-fill" [style.width]="category.percentage + '%'" 
+                                             [style.background-color]="getMoodColor('terrible')"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="totals-summary">
+                    <h4>Reflection Totals</h4>
+                    <div class="totals-grid">
+                        <div class="total-item">
+                            <span class="material-icons total-icon">emoji_events</span>
+                            <div class="total-value">{{ totalWins }}</div>
+                            <div class="total-label">Wins</div>
+                        </div>
+                        <div class="total-item">
+                            <span class="material-icons total-icon">school</span>
+                            <div class="total-value">{{ totalLessons }}</div>
+                            <div class="total-label">Lessons</div>
+                        </div>
+                        <div class="total-item">
+                            <span class="material-icons total-icon">favorite</span>
+                            <div class="total-value">{{ totalGratitude }}</div>
+                            <div class="total-label">Gratitude</div>
+                        </div>
+                        <div class="total-item">
+                            <span class="material-icons total-icon">trending_up</span>
+                            <div class="total-value">{{ totalImprovements }}</div>
+                            <div class="total-label">Improvements</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button (click)="resetReflections()" class="reset-btn" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+                Reset Reflections
+            </button>
+        </div>
+
+        <div class="right-column">
+            <div class="filter-bar">
+                <div class="filter-group search-group">
+                    <span class="material-icons">search</span>
+                    <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onFilterChange()" 
+                                 placeholder="Search reflections..." class="search-input" [style.color]="secondaryColor">
+                </div>
+                
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>Mood:</label>
+                        <select [(ngModel)]="filterMood" (change)="onFilterChange()" class="filter-select" [style.color]="primaryColor">
+                            <option value="all">All Moods</option>
+                            <option *ngFor="let mood of moods" [value]="mood.value">{{ mood.label }}</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Energy:</label>
+                        <select [(ngModel)]="filterEnergy" (change)="onFilterChange()" class="filter-select" [style.color]="primaryColor">
+                            <option value="all">All Levels</option>
+                            <option *ngFor="let level of [1,2,3,4,5]" [value]="level">
+                                {{ getRatingLabel(level) }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Time:</label>
+                        <select [(ngModel)]="filterTimeOfDay" (change)="onFilterChange()" class="filter-select" [style.color]="primaryColor">
+                            <option value="all">All Times</option>
+                            <option *ngFor="let time of timesOfDay" [value]="time.value">{{ time.label }}</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Period:</label>
+                        <select [(ngModel)]="filterDateRange" (change)="onFilterChange()" class="filter-select" [style.color]="primaryColor">
+                            <option value="all">All Time</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="view-toggle">
+                <button class="view-btn" [class.active]="currentView === 'list'" (click)="currentView = 'list'">
+                    <span class="material-icons">list</span> List
+                </button>
+                <button class="view-btn" [class.active]="currentView === 'trends'" (click)="currentView = 'trends'">
+                    <span class="material-icons">trending_up</span> Trends
+                </button>
+                <button class="view-btn" [class.active]="currentView === 'calendar'" (click)="currentView = 'calendar'">
+                    <span class="material-icons">calendar_today</span> Calendar
+                </button>
+            </div>
+
+            <div class="entries-header">
+                <h3>Your Reflection History</h3>
+                <span class="entries-count" *ngIf="filteredEntries.length">
+                    {{ filteredEntries.length }} of {{ totalEntries }} reflections
+                </span>
+            </div>
+            
+            <div class="entries-container" *ngIf="currentView === 'list' && filteredEntries.length">
+                <div *ngFor="let entry of filteredEntries" class="entry-card">
+                    <div class="entry-header">
+                        <div class="entry-date">
+                            <span class="material-icons">calendar_today</span>
+                            {{ formatEntryDate(entry.date) }}
+                            <span class="entry-time">
+                                <span class="material-icons">{{ getTimeOfDayIcon(entry.timeOfDay) }}</span>
+                                {{ getTimeOfDayLabel(entry.timeOfDay) }}
+                            </span>
+                            <span *ngIf="entry.isPrivate" class="private-badge">
+                                <span class="material-icons">lock</span> Private
+                            </span>
+                        </div>
+                        
+                        <div class="entry-ratings">
+                            <div class="rating-badge" [style.background-color]="getMoodColor(entry.mood)">
+                                <span class="material-icons">emoji_emotions</span>
+                                {{ getMoodEmoji(entry.mood) }}
+                            </div>
+                            <div class="rating-badge" [style.background-color]="getRatingColor(entry.energyLevel)">
+                                <span class="material-icons">flash_on</span>
+                                {{ entry.energyLevel }}/5
+                            </div>
+                            <div class="rating-badge" [style.background-color]="getRatingColor(entry.focusLevel)">
+                                <span class="material-icons">center_focus_strong</span>
+                                {{ entry.focusLevel }}/5
+                            </div>
+                            <div class="rating-badge" [style.background-color]="getRatingColor(entry.productivityScore)">
+                                <span class="material-icons">speed</span>
+                                {{ entry.productivityScore }}/5
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="entry-sections">
+                        <div class="entry-section" *ngIf="entry.wins?.length">
+                            <div class="section-header">
+                                <span class="material-icons">emoji_events</span>
+                                <h5>Wins</h5>
+                            </div>
+                            <div class="section-content">
+                                <div *ngFor="let win of entry.wins" class="section-item">
+                                    {{ win }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="entry-section" *ngIf="entry.challenges?.length">
+                            <div class="section-header">
+                                <span class="material-icons">warning</span>
+                                <h5>Challenges</h5>
+                            </div>
+                            <div class="section-content">
+                                <div *ngFor="let challenge of entry.challenges" class="section-item">
+                                    {{ challenge }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="entry-section" *ngIf="entry.lessonsLearned?.length">
+                            <div class="section-header">
+                                <span class="material-icons">school</span>
+                                <h5>Lessons Learned</h5>
+                            </div>
+                            <div class="section-content">
+                                <div *ngFor="let lesson of entry.lessonsLearned" class="section-item">
+                                    {{ lesson }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="entry-section" *ngIf="entry.gratitude?.length">
+                            <div class="section-header">
+                                <span class="material-icons">favorite</span>
+                                <h5>Gratitude</h5>
+                            </div>
+                            <div class="section-content">
+                                <div *ngFor="let item of entry.gratitude" class="section-item">
+                                    {{ item }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="entry-section" *ngIf="entry.goalsForTomorrow?.length">
+                            <div class="section-header">
+                                <span class="material-icons">flag</span>
+                                <h5>Tomorrow's Goals</h5>
+                            </div>
+                            <div class="section-content">
+                                <div *ngFor="let goal of entry.goalsForTomorrow" class="section-item">
+                                    {{ goal }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="entry-footer">
+                        <div class="entry-tags">
+                            <span *ngFor="let tag of entry.tags" class="entry-tag">
+                                {{ tag }}
+                            </span>
+                        </div>
+                        
+                        <div class="entry-actions">
+                            <button class="action-btn" (click)="updateEntry(entry.id, { mood: 'excellent' })" 
+                                            title="Mark as excellent day">
+                                <span class="material-icons">star</span>
+                            </button>
+                            <button class="action-btn delete-btn" (click)="deleteEntry(entry.id)" title="Delete reflection">
+                                <span class="material-icons">delete</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="entry-details" *ngIf="entry.location || entry.weather || entry.sleepHours">
+                        <span *ngIf="entry.location" class="entry-detail">
+                            <span class="material-icons">location_on</span>
+                            {{ entry.location }}
+                        </span>
+                        <span *ngIf="entry.weather" class="entry-detail">
+                            <span class="material-icons">cloud</span>
+                            {{ entry.weather }}
+                        </span>
+                        <span *ngIf="entry.sleepHours" class="entry-detail">
+                            <span class="material-icons">bed</span>
+                            {{ entry.sleepHours }}h sleep
+                        </span>
+                        <span *ngIf="entry.exerciseMinutes" class="entry-detail">
+                            <span class="material-icons">directions_run</span>
+                            {{ entry.exerciseMinutes }}min exercise
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="trends-container" *ngIf="currentView === 'trends'">
+                <div class="trends-section">
+                    <h4>Mood Trend (Last 7 Days)</h4>
+                    <div class="trend-chart">
+                        <div class="trend-labels">
+                            <span>Low</span>
+                            <span>Average</span>
+                            <span>High</span>
+                        </div>
+                        <div class="trend-bars">
+                            <div *ngFor="let day of moodTrend" class="trend-bar">
+                                <div class="trend-bar-label">{{ day.date | date:'EEE' }}</div>
+                                <div class="trend-bar-value">
+                                    <div class="trend-fill" [style.height]="(day.mood / 5 * 100) + '%'" 
+                                             [style.background-color]="getMoodColor('good')"></div>
+                                </div>
+                                <div class="trend-bar-number">{{ day.mood }}/5</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="trends-grid">
+                    <div class="trend-card">
+                        <h5>Energy Level</h5>
+                        <div class="trend-average">{{ averageEnergy | number:'1.1-1' }}/5</div>
+                        <div class="trend-progress">
+                            <div class="progress-fill" [style.width]="(averageEnergy / 5 * 100) + '%'" 
+                                     [style.background-color]="getRatingColor(3)"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="trend-card">
+                        <h5>Focus Level</h5>
+                        <div class="trend-average">{{ averageFocus | number:'1.1-1' }}/5</div>
+                        <div class="trend-progress">
+                            <div class="progress-fill" [style.width]="(averageFocus / 5 * 100) + '%'" 
+                                     [style.background-color]="getRatingColor(4)"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="trend-card">
+                        <h5>Productivity</h5>
+                        <div class="trend-average">{{ averageProductivity | number:'1.1-1' }}/5</div>
+                        <div class="trend-progress">
+                            <div class="progress-fill" [style.width]="(averageProductivity / 5 * 100) + '%'" 
+                                     [style.background-color]="getRatingColor(5)"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div *ngIf="(!filteredEntries.length || !reflectionEntries.length) && !isLoading" class="empty-state">
+                <div class="empty-state-content">
+                    <span class="material-icons empty-icon">psychology</span>
+                    <h3>Start Your Daily Reflection</h3>
+                    <p>Daily reflection helps you grow, learn, and improve each day.</p>
+                    <div class="prompt-suggestions">
+                        <div class="prompt" (click)="reflectionForm.patchValue({ wins: ['Completed an important task'] })">
+                            What went well today?
+                        </div>
+                        <div class="prompt" (click)="reflectionForm.patchValue({ challenges: ['Felt distracted during work'] })">
+                            What challenges did you face?
+                        </div>
+                        <div class="prompt" (click)="reflectionForm.patchValue({ lessonsLearned: ['Taking breaks improves focus'] })">
+                            What did you learn today?
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="save-notification" *ngIf="showSaveNotification">
+        <span class="material-icons">check_circle</span>
+        Reflection saved successfully!
+    </div>
+</div>

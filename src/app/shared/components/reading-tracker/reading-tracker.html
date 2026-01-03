@@ -1,0 +1,416 @@
+<div class="reading-tracker-container" [style.background-color]="primaryColor" [style.color]="secondaryColor">
+  <div class="header-section">
+    <span class="material-icons tracker-icon" [style.color]="secondaryColor">menu_book</span>
+    <h2 class="title">Reading Tracker</h2>
+  </div>
+
+  <div class="reading-main-layout">
+    <div class="left-column">
+      <div class="forms-container">
+        <form [formGroup]="bookForm" (ngSubmit)="addBook()" class="book-form">
+          <div class="form-header">
+            <span class="material-icons">library_add</span>
+            <h3>Add New Book</h3>
+          </div>
+          
+          <div class="input-group">
+            <label>Book Title</label>
+            <input type="text" formControlName="title" placeholder="Enter book title" [style.color]="secondaryColor">
+          </div>
+          
+          <div class="input-row">
+            <div class="input-group">
+              <label>Author</label>
+              <input type="text" formControlName="author" placeholder="Author name" [style.color]="secondaryColor">
+            </div>
+            
+            <div class="input-group">
+              <label>Genre</label>
+              <select formControlName="genre" [style.color]="primaryColor">
+                <option value="">Select Genre</option>
+                <option *ngFor="let genre of genres" [value]="genre">{{ genre }}</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="input-row">
+            <div class="input-group">
+              <label>Total Pages</label>
+              <input type="number" formControlName="totalPages" min="1" placeholder="300" [style.color]="secondaryColor">
+            </div>
+            
+            <div class="input-group">
+              <label>Status</label>
+              <select formControlName="status" [style.color]="primaryColor">
+                <option value="to-read">To Read</option>
+                <option value="reading">Currently Reading</option>
+                <option value="finished">Finished</option>
+                <option value="abandoned">Abandoned</option>
+              </select>
+            </div>
+          </div>
+          
+          <button type="submit" class="update-btn" [disabled]="bookForm.invalid || isLoading" 
+                  [style.background-color]="secondaryColor" [style.color]="primaryColor">
+            <span *ngIf="isLoading" class="spinner"></span>
+            {{ isLoading ? 'Adding...' : 'Add Book' }}
+          </button>
+        </form>
+
+        <form [formGroup]="sessionForm" (ngSubmit)="addReadingSession()" class="session-form">
+          <div class="form-header">
+            <span class="material-icons">timer</span>
+            <h3>Log Reading Session</h3>
+          </div>
+          
+          <div class="input-group">
+            <label>Book</label>
+            <select formControlName="bookId" [style.color]="primaryColor">
+              <option value="">Select Book</option>
+              <option *ngFor="let book of books" [value]="book.id">
+                {{ book.title }} ({{ getBookProgress(book).toFixed(0) }}%)
+              </option>
+            </select>
+          </div>
+          
+          <div class="input-row">
+            <div class="input-group">
+              <label>Date</label>
+              <input type="date" formControlName="date" [style.color]="secondaryColor">
+            </div>
+            
+            <div class="input-group">
+              <label>Reading Type</label>
+              <select formControlName="readingType" [style.color]="primaryColor">
+                <option *ngFor="let type of readingTypes" [value]="type.value">{{ type.label }}</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="input-row">
+            <div class="input-group">
+              <label>Start Time</label>
+              <input type="time" formControlName="startTime" [style.color]="secondaryColor">
+            </div>
+            
+            <div class="input-group">
+              <label>End Time</label>
+              <input type="time" formControlName="endTime" [style.color]="secondaryColor">
+            </div>
+          </div>
+          
+          <div class="input-row">
+            <div class="input-group">
+              <label>Pages Read</label>
+              <input type="number" formControlName="pagesRead" min="1" placeholder="0" [style.color]="secondaryColor">
+            </div>
+            
+            <div class="input-group">
+              <label>Rating (1-5)</label>
+              <input type="number" formControlName="rating" min="0" max="5" step="0.5" placeholder="0" [style.color]="secondaryColor">
+            </div>
+          </div>
+          
+          <div class="input-group">
+            <label>Notes (Optional)</label>
+            <textarea formControlName="notes" placeholder="Any thoughts about this reading session..." [style.color]="secondaryColor"></textarea>
+          </div>
+          
+          <button type="submit" class="update-btn" [disabled]="sessionForm.invalid || isLoading" 
+                  [style.background-color]="secondaryColor" [style.color]="primaryColor">
+            <span *ngIf="isLoading" class="spinner"></span>
+            {{ isLoading ? 'Logging...' : 'Log Session' }}
+          </button>
+        </form>
+
+        <form [formGroup]="goalForm" (ngSubmit)="addReadingGoal()" class="goal-form">
+          <div class="form-header">
+            <span class="material-icons">flag</span>
+            <h3>Set Reading Goal</h3>
+          </div>
+          
+          <div class="input-row">
+            <div class="input-group">
+              <label>Goal Type</label>
+              <select formControlName="type" [style.color]="primaryColor" (change)="onGoalTypeChange($event)">
+                <option *ngFor="let goalType of goalTypes" [value]="goalType.value">{{ goalType.label }}</option>
+              </select>
+            </div>
+            
+            <div class="input-group">
+              <label>Target</label>
+              <input type="number" formControlName="target" min="1" placeholder="50" [style.color]="secondaryColor">
+            </div>
+          </div>
+          
+          <div class="input-row">
+            <div class="input-group">
+              <label>Start Date</label>
+              <input type="date" formControlName="startDate" [style.color]="secondaryColor">
+            </div>
+            
+            <div class="input-group">
+              <label>End Date</label>
+              <input type="date" formControlName="endDate" [style.color]="secondaryColor">
+            </div>
+          </div>
+          
+          <button type="submit" class="update-btn" [disabled]="goalForm.invalid || isLoading" 
+                  [style.background-color]="secondaryColor" [style.color]="primaryColor">
+            <span *ngIf="isLoading" class="spinner"></span>
+            {{ isLoading ? 'Creating...' : 'Set Goal' }}
+          </button>
+        </form>
+      </div>
+
+      <div class="stats-container">
+        <div class="insights-section" *ngIf="readingInsights.length">
+          <h3>Reading Insights</h3>
+          <div *ngFor="let insight of readingInsights" class="insight-card" [class]="insight.type">
+            <span class="material-icons insight-icon">auto_awesome</span>
+            <p>{{ insight.message }}</p>
+          </div>
+        </div>
+
+        <div class="today-section">
+          <h3>Today's Reading</h3>
+          <div class="today-card">
+            <div class="today-metrics">
+              <div class="today-metric">
+                <span class="metric-value">{{ formatMinutes(todayReadingTime) }}</span>
+                <span class="metric-label">Reading Time</span>
+              </div>
+              <div class="today-metric">
+                <span class="metric-value">{{ todayPagesRead }}</span>
+                <span class="metric-label">Pages Read</span>
+              </div>
+              <div class="today-metric">
+                <span class="metric-value">{{ readingStreak }} days</span>
+                <span class="metric-label">Current Streak</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="reading-metrics">
+          <h3>Reading Overview</h3>
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-value">{{ formatMinutes(weeklyReadingTime) }}</span>
+              <span class="metric-label">Weekly Time</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value">{{ formatMinutes(monthlyReadingTime) }}</span>
+              <span class="metric-label">Monthly Time</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value">{{ totalBooksRead }}</span>
+              <span class="metric-label">Books Finished</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value">{{ totalPagesRead }}</span>
+              <span class="metric-label">Total Pages</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value">{{ averageDailyReading.toFixed(1) }}</span>
+              <span class="metric-label">Avg Daily Pages</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value" [style.color]="getProgressColor(readingScore)">{{ readingScore }}/100</span>
+              <span class="metric-label">Reading Score</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="current-books" *ngIf="getCurrentlyReadingBooks().length">
+          <h3>Currently Reading</h3>
+          <div class="books-list">
+            <div *ngFor="let book of getCurrentlyReadingBooks()" class="book-card">
+              <div class="book-header">
+                <span class="book-icon">{{ getBookStatusIcon(book.status) }}</span>
+                <div class="book-info">
+                  <h4>{{ book.title }}</h4>
+                  <span class="book-author">{{ book.author }}</span>
+                </div>
+              </div>
+              <div class="book-progress">
+                <div class="progress-header">
+                  <span class="progress-label">Progress</span>
+                  <span class="progress-percentage">{{ getBookProgress(book).toFixed(0) }}%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width]="getBookProgress(book) + '%'"></div>
+                </div>
+                <div class="progress-details">
+                  <span class="page-count">{{ book.currentPage }}/{{ book.totalPages }} pages</span>
+                  <button class="status-btn" (click)="updateBookStatus(book.id, 'finished')" *ngIf="book.currentPage >= book.totalPages">
+                    Mark as Finished
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="active-goals" *ngIf="getActiveGoals().length">
+          <h3>Active Goals</h3>
+          <div class="goals-list">
+            <div *ngFor="let goal of getActiveGoals()" class="goal-card">
+              <div class="goal-header">
+                <span class="goal-type">{{ goal.type | titlecase }} Goal</span>
+                <span class="goal-status" [style.color]="getStatusColor(goal.status)">{{ goal.status }}</span>
+              </div>
+              <div class="goal-progress">
+                <div class="goal-progress-bar">
+                  <div class="goal-progress-fill" [style.width]="getGoalProgress(goal) + '%'"></div>
+                </div>
+                <span class="goal-details">{{ goal.current }}/{{ goal.target }} 
+                  {{ goal.type === 'yearly' || goal.type === 'book' ? 'books' : 'pages' }}</span>
+              </div>
+              <div class="goal-period">
+                {{ getFullDateDisplay(goal.startDate) }} - {{ getFullDateDisplay(goal.endDate) }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button (click)="resetReadingTracker()" class="reset-btn" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+        Reset All Reading Data
+      </button>
+    </div>
+
+    <div class="right-column">
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label>Date:</label>
+          <select [(ngModel)]="filterDate" (change)="filterSessions()" class="filter-select" [style.color]="primaryColor">
+            <option value="all">All Dates</option>
+            <option value="{{ today }}">Today</option>
+            <option *ngFor="let date of getUniqueDates()" [value]="date">
+              {{ getDateDisplay(date) }}
+            </option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label>Book:</label>
+          <select [(ngModel)]="filterBook" (change)="filterSessions()" class="filter-select" [style.color]="primaryColor">
+            <option value="all">All Books</option>
+            <option *ngFor="let book of books" [value]="book.id">
+              {{ book.title }}
+            </option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label>Type:</label>
+          <select [(ngModel)]="filterType" (change)="filterSessions()" class="filter-select" [style.color]="primaryColor">
+            <option value="all">All Types</option>
+            <option *ngFor="let type of readingTypes" [value]="type.value">{{ type.label }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="entries-header">
+        <h3>Reading History</h3>
+        <span class="entries-count" *ngIf="getFilteredSessions().length">
+          Showing {{ getDisplayedSessions().length }} of {{ getFilteredSessions().length }} sessions
+        </span>
+      </div>
+      
+      <div class="entries-container" *ngIf="getFilteredSessions().length">
+        <table class="reading-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Book</th>
+              <th>Time</th>
+              <th>Pages</th>
+              <th>Type</th>
+              <th>Duration</th>
+              <th>Rating</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let session of getDisplayedSessions()">
+              <td>
+                <div class="session-date">{{ getDateDisplay(session.date) }}</div>
+                <div class="session-day">{{ getDayName(session.date) }}</div>
+              </td>
+              <td>
+                <div class="session-book">{{ session.bookTitle }}</div>
+                <div class="session-progress">
+                  <div class="session-progress-bar">
+                    <div class="session-progress-fill" [style.width]="(session.pagesRead / session.totalPages) * 100 + '%'"></div>
+                  </div>
+                  <span class="session-pages">{{ session.pagesRead }}/{{ session.totalPages }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="session-time">{{ formatTime(session.startTime) }} - {{ formatTime(session.endTime) }}</div>
+              </td>
+              <td>
+                <span class="session-pages-read">{{ session.pagesRead }} pages</span>
+              </td>
+              <td>
+                <span class="session-type">
+                  {{ getReadingTypeIcon(session.readingType) }} {{ session.readingType | titlecase }}
+                </span>
+              </td>
+              <td>
+                <span class="session-duration">{{ formatMinutes(session.duration) }}</span>
+              </td>
+              <td>
+                <span class="session-rating" *ngIf="session.rating && session.rating > 0">
+                  ⭐ {{ session.rating }}
+                </span>
+                <span class="session-no-rating" *ngIf="!session.rating || session.rating === 0">
+                  -
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="action-btn" (click)="deleteReadingSession(session.id)">
+                    <span class="material-icons">delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="pagination" *ngIf="totalPages > 1">
+          <button class="pagination-button" (click)="previousPage()" [disabled]="currentPage === 1">
+            <span class="material-icons">chevron_left</span>
+          </button>
+          
+          <button *ngFor="let page of getPageNumbers()" 
+                  class="pagination-button" 
+                  [class.active]="page === currentPage"
+                  (click)="goToPage(page)">
+            {{ page }}
+          </button>
+          
+          <button class="pagination-button" (click)="nextPage()" [disabled]="currentPage === totalPages">
+            <span class="material-icons">chevron_right</span>
+          </button>
+          
+          <span class="pagination-info">
+            Page {{ currentPage }} of {{ totalPages }}
+          </span>
+        </div>
+      </div>
+      
+      <div *ngIf="!getFilteredSessions().length && !isLoading" class="empty-state">
+        <p>No reading sessions found. Start by adding a book and logging your first reading session! 📖</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="save-notification" *ngIf="showSaveNotification">
+    <span class="material-icons">check_circle</span>
+    Saved successfully!
+  </div>
+</div>

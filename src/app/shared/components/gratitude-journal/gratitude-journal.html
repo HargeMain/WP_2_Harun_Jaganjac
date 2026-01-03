@@ -1,1 +1,365 @@
-<p>gratitude-journal works!</p>
+<div class="gratitude-journal-container" [style.background-color]="primaryColor" [style.color]="secondaryColor">
+    <div class="header-section">
+        <span class="material-icons tracker-icon" [style.color]="secondaryColor">spa</span>
+        <h2 class="title">Gratitude Journal</h2>
+    </div>
+
+    <div class="journal-main-layout">
+        <div class="left-column">
+            <div class="forms-container">
+                <form [formGroup]="entryForm" (ngSubmit)="addEntry()" class="entry-form">
+                    <div class="form-header">
+                        <span class="material-icons">edit_note</span>
+                        <h3>New Gratitude Entry</h3>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Date</label>
+                        <input type="date" formControlName="date" [style.color]="secondaryColor">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>What are you grateful for? *</label>
+                        <textarea formControlName="content" placeholder="Write at least one thing you're grateful for today..." 
+                                         rows="4" [style.color]="secondaryColor"></textarea>
+                        <div class="character-count" *ngIf="entryForm.get('content')?.value">
+                            {{ entryForm.get('content')?.value?.length || 0 }} characters
+                        </div>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Category</label>
+                            <select formControlName="category" [style.color]="primaryColor">
+                                <option *ngFor="let cat of categories" [value]="cat.value">
+                                    {{ cat.label }}
+                                </option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>How does it make you feel?</label>
+                            <select formControlName="mood" [style.color]="primaryColor">
+                                <option *ngFor="let mood of moods" [value]="mood.value">
+                                    {{ mood.label }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Tags</label>
+                        <div class="tags-container">
+                            <div class="tag-option" *ngFor="let tag of tags" 
+                                     [class.selected]="entryForm.get('tags')?.value?.includes(tag)"
+                                     (click)="toggleTag(tag)">
+                                {{ tag }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Location</label>
+                            <input type="text" formControlName="location" placeholder="Where are you writing from?" [style.color]="secondaryColor">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>Weather</label>
+                            <select formControlName="weather" [style.color]="primaryColor">
+                                <option value="">Select weather</option>
+                                <option value="sunny">Sunny</option>
+                                <option value="cloudy">Cloudy</option>
+                                <option value="rainy">Rainy</option>
+                                <option value="snowy">Snowy</option>
+                                <option value="windy">Windy</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="checkbox-container">
+                            <input type="checkbox" formControlName="isPrivate" id="privateEntry">
+                            <label for="privateEntry">Keep this entry private</label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="update-btn" [disabled]="entryForm.invalid || isLoading" 
+                                    [style.background-color]="secondaryColor" [style.color]="primaryColor">
+                        <span *ngIf="isLoading" class="spinner"></span>
+                        {{ isLoading ? 'Saving...' : 'Save Entry' }}
+                    </button>
+                </form>
+            </div>
+
+            <div class="stats-container">
+                <div class="insights-section" *ngIf="aiInsights.length">
+                    <h3>Journal Insights</h3>
+                    <div *ngFor="let insight of aiInsights" class="insight-card" [class]="insight.type">
+                        <span class="material-icons insight-icon">auto_awesome</span>
+                        <p>{{ insight.message }}</p>
+                    </div>
+                </div>
+
+                <div class="journal-metrics">
+                    <h3>Journal Metrics</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <span class="metric-value">{{ totalEntries }}</span>
+                            <span class="metric-label">Total Entries</span>
+                        </div>
+                        <div class="metric-card streak-card" [class.active-streak]="currentStreak > 0">
+                            <span class="metric-value streak-days">{{ currentStreak }}</span>
+                            <span class="metric-label">Day Streak</span>
+                            <span class="streak-subtext" *ngIf="longestStreak > 0">Best: {{ longestStreak }}</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">{{ entriesThisWeek }}</span>
+                            <span class="metric-label">This Week</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">{{ entriesThisMonth }}</span>
+                            <span class="metric-label">This Month</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="distribution-section">
+                    <div class="distribution-column">
+                        <h4>Mood Distribution</h4>
+                        <div class="mood-chart">
+                            <div *ngFor="let mood of moodDistribution" class="mood-item">
+                                <div class="mood-header">
+                                    <span class="material-icons mood-icon">{{ getMoodIcon(mood.mood) }}</span>
+                                    <span class="mood-label">{{ getMoodLabel(mood.mood) }}</span>
+                                    <span class="mood-percentage">{{ mood.percentage | number:'1.0-0' }}%</span>
+                                </div>
+                                <div class="mood-bar">
+                                    <div class="mood-fill" [style.width]="mood.percentage + '%'" 
+                                             [style.background-color]="mood.color"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="distribution-column">
+                        <h4>Category Distribution</h4>
+                        <div class="category-chart">
+                            <div *ngFor="let category of categoryDistribution" class="category-item">
+                                <div class="category-header">
+                                    <span class="material-icons category-icon">{{ getCategoryIcon(category.category) }}</span>
+                                    <span class="category-label">{{ getCategoryLabel(category.category) }}</span>
+                                    <span class="category-percentage">{{ category.percentage | number:'1.0-0' }}%</span>
+                                </div>
+                                <div class="category-bar">
+                                    <div class="category-fill" [style.width]="category.percentage + '%'"
+                                             [style.background-color]="secondaryColor + '40'"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="scores-section">
+                    <div class="score-card">
+                        <div class="score-header">
+                            <span class="material-icons">emoji_emotions</span>
+                            <h4>Positivity Score</h4>
+                        </div>
+                        <div class="score-value">{{ positivityScore }}</div>
+                        <div class="score-label">/100</div>
+                        <div class="score-bar">
+                            <div class="score-fill" [style.width]="positivityScore + '%'" 
+                                     [style.background-color]="getMoodColor('joyful')"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-card">
+                        <div class="score-header">
+                            <span class="material-icons">trending_up</span>
+                            <h4>Consistency Score</h4>
+                        </div>
+                        <div class="score-value">{{ consistencyScore }}</div>
+                        <div class="score-label">/100</div>
+                        <div class="score-bar">
+                            <div class="score-fill" [style.width]="consistencyScore + '%'" 
+                                     [style.background-color]="getMoodColor('peaceful')"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button (click)="resetJournal()" class="reset-btn" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+                Reset Journal
+            </button>
+        </div>
+
+        <div class="right-column">
+            <div class="filter-bar" [formGroup]="filterForm">
+                <div class="filter-group search-group">
+                    <span class="material-icons">search</span>
+                    <input type="text" formControlName="searchTerm" placeholder="Search entries..." 
+                           class="search-input" [style.color]="secondaryColor">
+                </div>
+                
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>Category:</label>
+                        <select formControlName="filterCategory" class="filter-select" [style.color]="primaryColor">
+                            <option value="all">All Categories</option>
+                            <option *ngFor="let cat of categories" [value]="cat.value">{{ cat.label }}</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Mood:</label>
+                        <select formControlName="filterMood" class="filter-select" [style.color]="primaryColor">
+                            <option value="all">All Moods</option>
+                            <option *ngFor="let mood of moods" [value]="mood.value">{{ mood.label }}</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Time:</label>
+                        <select formControlName="filterDate" class="filter-select" [style.color]="primaryColor">
+                            <option value="all">All Time</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Tag:</label>
+                        <select formControlName="filterTag" class="filter-select" [style.color]="primaryColor">
+                            <option value="all">All Tags</option>
+                            <option *ngFor="let tag of tags" [value]="tag">{{ tag }}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="view-toggle">
+                <button class="view-btn" [class.active]="currentView === 'list'" (click)="currentView = 'list'">
+                    <span class="material-icons">list</span> List
+                </button>
+                <button class="view-btn" [class.active]="currentView === 'calendar'" (click)="currentView = 'calendar'">
+                    <span class="material-icons">calendar_today</span> Calendar
+                </button>
+                <button class="view-btn" [class.active]="currentView === 'mood'" (click)="currentView = 'mood'">
+                    <span class="material-icons">pie_chart</span> Mood Map
+                </button>
+            </div>
+
+            <div class="entries-header">
+                <h3>Your Gratitude Journey</h3>
+                <span class="entries-count" *ngIf="filteredEntries.length">
+                    {{ filteredEntries.length }} of {{ totalEntries }} entries
+                </span>
+            </div>
+            
+            <div class="entries-container" *ngIf="currentView === 'list' && filteredEntries.length">
+                <div *ngFor="let entry of filteredEntries" class="entry-card">
+                    <div class="entry-header">
+                        <div class="entry-date">
+                            <span class="material-icons">calendar_today</span>
+                            {{ formatEntryDate(entry.date) }}
+                            <span *ngIf="entry.isPrivate" class="private-badge">
+                                <span class="material-icons">lock</span> Private
+                            </span>
+                        </div>
+                        
+                        <div class="entry-meta">
+                            <div class="entry-category" [style.background-color]="getMoodColor(entry.mood) + '30'">
+                                <span class="material-icons">{{ getCategoryIcon(entry.category) }}</span>
+                                {{ getCategoryLabel(entry.category) }}
+                            </div>
+                            
+                            <div class="entry-mood" [style.color]="getMoodColor(entry.mood)">
+                                <span class="material-icons">{{ getMoodIcon(entry.mood) }}</span>
+                                {{ getMoodLabel(entry.mood) }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="entry-content">
+                        {{ entry.content }}
+                    </div>
+                    
+                    <div class="entry-footer">
+                        <div class="entry-tags">
+                            <span *ngFor="let tag of entry.tags" class="entry-tag">
+                                {{ tag }}
+                            </span>
+                        </div>
+                        
+                        <div class="entry-actions">
+                            <button class="action-btn" (click)="updateEntry(entry.id, { mood: 'joyful' })" 
+                                            title="Mark as joyful">
+                                <span class="material-icons">emoji_emotions</span>
+                            </button>
+                            <button class="action-btn delete-btn" (click)="deleteEntry(entry.id)" title="Delete entry">
+                                <span class="material-icons">delete</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="entry-details" *ngIf="entry.location || entry.weather">
+                        <span *ngIf="entry.location" class="entry-detail">
+                            <span class="material-icons">location_on</span>
+                            {{ entry.location }}
+                        </span>
+                        <span *ngIf="entry.weather" class="entry-detail">
+                            <span class="material-icons">cloud</span>
+                            {{ entry.weather }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mood-map-container" *ngIf="currentView === 'mood'">
+                <div class="mood-grid">
+                    <div *ngFor="let mood of moods" class="mood-tile" [style.background-color]="mood.color + '40'">
+                        <div class="mood-tile-header">
+                            <span class="material-icons">{{ mood.icon }}</span>
+                            <h4>{{ mood.label }}</h4>
+                        </div>
+                        <div class="mood-count">
+                               {{ getMoodCount(mood.value) }} entries
+                        </div>
+                        <div class="mood-entries">
+                            <div *ngFor="let entry of getMoodEntries(mood.value)" 
+                                     class="mood-entry-preview">
+                                {{ entry.content.substring(0, 60) }}...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div *ngIf="(!filteredEntries.length || !gratitudeEntries.length) && !isLoading" class="empty-state">
+                <div class="empty-state-content">
+                    <span class="material-icons empty-icon">spa</span>
+                    <h3>Start Your Gratitude Practice</h3>
+                    <p>Writing down what you're grateful for can increase happiness and reduce stress.</p>
+                    <div class="prompt-suggestions">
+                        <div class="prompt" (click)="entryForm.patchValue({ content: 'I am grateful for my health and the ability to move my body today.' })">
+                            "I am grateful for..."
+                        </div>
+                        <div class="prompt" (click)="entryForm.patchValue({ content: 'Today I appreciated the kindness of a stranger or friend.' })">
+                            "Today I appreciated..."
+                        </div>
+                        <div class="prompt" (click)="entryForm.patchValue({ content: 'I feel thankful for having a comfortable place to rest.' })">
+                            "I feel thankful for..."
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="save-notification" *ngIf="showSaveNotification">
+        <span class="material-icons">check_circle</span>
+        Gratitude entry saved!
+    </div>
+</div>

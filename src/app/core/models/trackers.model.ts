@@ -7,11 +7,11 @@ export interface Trackers {
   mealPlanner: any[];
   moodTracker: any[];
   calendarTracker: any[]; 
-  financeTracker: { balance: number; expenses: any[] }; 
+  financeTracker: any[]; 
   gratitudeJournal: any[]; 
   dailyReflection: any[]; 
-  waterIntake: { dailyGoal: number; current: number }; 
-  readingTracker: { books: string[]; pagesRead: number }; 
+  waterIntake: any[]; 
+  readingTracker: any[]; 
   userId: string;
 
 }

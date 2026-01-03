@@ -20,11 +20,11 @@ export class TrackersService {
       mealPlanner: [],
       moodTracker: [],
       calendarTracker: [],
-      financeTracker: { balance: 0, expenses: [] },
+      financeTracker: [],
       gratitudeJournal: [],
       dailyReflection: [],
-      waterIntake: { dailyGoal: 2000, current: 0 },
-      readingTracker: { books: [], pagesRead: 0 }
+      waterIntake:  [],
+      readingTracker: [],
     };
 
     await setDoc(trackerRef, defaultTrackers);
@@ -50,16 +50,10 @@ export class TrackersService {
       case 'calendarTracker':
       case 'gratitudeJournal':
       case 'dailyReflection':
-        defaultValue = [];
-        break;
       case 'financeTracker':
-        defaultValue = { balance: 0, expenses: [] };
-        break;
       case 'waterIntake':
-        defaultValue = { dailyGoal: 2000, current: 0 };
-        break;
       case 'readingTracker':
-        defaultValue = { books: [], pagesRead: 0 };
+        defaultValue = [];
         break;
       default:
         throw new Error('Invalid tracker name');

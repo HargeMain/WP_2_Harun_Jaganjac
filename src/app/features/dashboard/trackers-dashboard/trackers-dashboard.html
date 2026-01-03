@@ -24,24 +24,42 @@
          (touchstart)="onTouchStart($event)"
          (touchend)="onTouchEnd($event)">
       
+      <div class="drag-instructions" *ngIf="!isDragging" [style.color]="primaryColor">
+        <span class="material-icons">drag_indicator</span>
+        Drag and drop circles to reorder trackers
+      </div>
+      
       <div class="tracker-path" [style.color]="primaryColor">
-        <div class="path-dots">
+        <div class="path-dots" #pathDots>
           <span 
             *ngFor="let tracker of trackers; let i = index"
             class="path-icon"
             [class.active]="i === currentIndex"
             [class.completed]="i < currentIndex"
+            [class.dragging]="dragStartIndex === i"
+            [class.drag-over]="dragOverIndex === i"
+            draggable="true"
+            (dragstart)="onDragStart($event, i)"
+            (dragover)="onDragOver($event, i)"
+            (dragleave)="onDragLeave($event, i)"
+            (drop)="onDrop($event, i)"
+            (dragend)="onDragEnd($event)"
             (click)="goToTracker(i)"
-            [style.background-color]="i === currentIndex ? primaryColor : 'transparent'"
+            [style.background-color]="i === currentIndex ? primaryColor : secondaryColor"
             [style.color]="i === currentIndex ? secondaryColor : primaryColor"
-            [style.border-color]="primaryColor">
+            [style.border-color]="primaryColor"
+            [style.order]="tracker.order">
             <span class="material-icons">{{ tracker.icon }}</span>
+            <span class="drag-handle" *ngIf="!isDragging || dragStartIndex !== i">
+              <span class="material-icons">drag_handle</span>
+            </span>
           </span>
         </div>
         <div class="path-labels">
           <span *ngFor="let tracker of trackers; let i = index" 
                 class="path-label"
                 [class.active]="i === currentIndex"
+                [class.drag-over-label]="dragOverIndex === i"
                 (click)="goToTracker(i)">
             {{ tracker.name }}
           </span>
@@ -52,7 +70,7 @@
         <button 
           class="slider-arrow left-arrow"
           (click)="prevTracker()"
-          [disabled]="isFirst || isAnimating"
+          [disabled]="isFirst || isAnimating || isDragging"
           [style.background-color]="primaryColor"
           [style.color]="secondaryColor"
           [style.opacity]="isFirst ? '0.5' : '1'"
@@ -120,7 +138,39 @@
                       [secondaryColor]="secondaryColor">
                     </app-calendar-tracker>
                   </ng-container>
-                  
+
+                  <ng-container *ngSwitchCase="'gratitude'">
+                    <app-gratitude-journal
+                      *ngIf="tracker.visible"
+                      [primaryColor]="primaryColor"
+                      [secondaryColor]="secondaryColor">
+                    </app-gratitude-journal>
+                  </ng-container>
+
+                  <ng-container *ngSwitchCase="'daily-reflection'">
+                    <app-daily-reflection
+                      *ngIf="tracker.visible"
+                      [primaryColor]="primaryColor"
+                      [secondaryColor]="secondaryColor">
+                    </app-daily-reflection>
+                  </ng-container>
+
+                 <ng-container *ngSwitchCase="'finance'">
+                    <app-finance-tracker
+                      *ngIf="tracker.visible"
+                      [primaryColor]="primaryColor"
+                      [secondaryColor]="secondaryColor">
+                    </app-finance-tracker>
+                  </ng-container> 
+
+                  <ng-container *ngSwitchCase="'water'">
+                    <app-water-intake
+                      *ngIf="tracker.visible"
+                      [primaryColor]="primaryColor"
+                      [secondaryColor]="secondaryColor">
+                    </app-water-intake>
+                  </ng-container>
+      
                   <ng-container *ngSwitchCase="'yoga'">
                     <app-yoga-fitness-planner
                       *ngIf="tracker.visible"
@@ -135,6 +185,13 @@
                       [secondaryColor]="secondaryColor">
                     </app-task-project-planner>
                   </ng-container>
+                  <ng-container *ngSwitchCase="'reading'">
+                    <app-reading-tracker
+                      *ngIf="tracker.visible"
+                      [primaryColor]="primaryColor"
+                      [secondaryColor]="secondaryColor">
+                    </app-reading-tracker>
+                    </ng-container>
                 </ng-container>
               </div>
             </div>
@@ -144,7 +201,7 @@
         <button 
           class="slider-arrow right-arrow"
           (click)="nextTracker()"
-          [disabled]="isLast || isAnimating"
+          [disabled]="isLast || isAnimating || isDragging"
           [style.background-color]="primaryColor"
           [style.color]="secondaryColor"
           [style.opacity]="isLast ? '0.5' : '1'"
@@ -163,7 +220,9 @@
           class="indicator"
           [class.active]="i === currentIndex"
           (click)="goToTracker(i)"
-          [style.background-color]="i === currentIndex ? primaryColor : 'rgba(0,0,0,0.1)'">
+          [disabled]="isDragging"
+          [style.background-color]="i === currentIndex ? primaryColor : 'rgba(0,0,0,0.1)'"
+          [style.order]="tracker.order">
         </button>
       </div>
 
@@ -177,6 +236,15 @@
         <span class="tracker-icon" [style.color]="primaryColor">
           <span class="material-icons">{{ trackers[currentIndex].icon }}</span>
         </span>
+        <button 
+          class="reset-order-btn"
+          (click)="resetTrackersOrder()"
+          *ngIf="!isDragging"
+          [style.background-color]="primaryColor"
+          [style.color]="secondaryColor">
+          <span class="material-icons">restart_alt</span>
+          Reset Order
+        </button>
       </div>
     </div>
 
@@ -187,5 +255,5 @@
     [secondaryColor]="secondaryColor"
     [isDrawerOpen]="isDrawerOpen"
   ></app-footer>
-
+ 
 </div>

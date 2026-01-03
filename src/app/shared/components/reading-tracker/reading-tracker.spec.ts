@@ -1,17 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DailyReflectionComponent } from './daily-reflection';
+import { ReadingTrackerComponent } from './reading-tracker';
 
-describe('DailyReflectionComponent', () => {
-  let component: DailyReflectionComponent;
-  let fixture: ComponentFixture<DailyReflectionComponent>;
+describe('ReadingTrackerComponent', () => {
+  let component: ReadingTrackerComponent;
+  let fixture: ComponentFixture<ReadingTrackerComponent>;
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DailyReflectionComponent]
+      imports: [ReadingTrackerComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(DailyReflectionComponent);
+    fixture = TestBed.createComponent(ReadingTrackerComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

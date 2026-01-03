@@ -1,0 +1,445 @@
+<div class="finance-tracker-container" [style.background-color]="primaryColor" [style.color]="secondaryColor">
+  <div class="header-section">
+    <span class="material-icons tracker-icon" [style.color]="secondaryColor">account_balance_wallet</span>
+    <h2 class="title">Finance Tracker</h2>
+  </div>
+
+  <div class="finance-main-layout">
+    <div class="left-column">
+      <div class="forms-container">
+        <form [formGroup]="accountForm" (ngSubmit)="addAccount()" class="account-form">
+          <div class="form-header">
+            <span class="material-icons">account_balance</span>
+            <h3>New Account</h3>
+          </div>
+          
+          <div class="input-group">
+            <label>Account Name</label>
+            <input type="text" formControlName="name" placeholder="e.g., Main Checking Account" [style.color]="secondaryColor">
+          </div>
+          
+          <div class="input-row">
+            <div class="input-group">
+              <label>Account Type</label>
+              <select formControlName="type" [style.color]="primaryColor">
+                <option value="checking">Checking</option>
+                <option value="savings">Savings</option>
+                <option value="credit">Credit Card</option>
+                <option value="investment">Investment</option>
+                <option value="cash">Cash</option>
+              </select>
+            </div>
+            
+            <div class="input-group">
+              <label>Currency</label>
+              <select formControlName="currency" [style.color]="primaryColor">
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="GBP">GBP (£)</option>
+                <option value="CAD">CAD ($)</option>
+                <option value="AUD">AUD ($)</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="input-row">
+            <div class="input-group">
+              <label>Initial Balance</label>
+              <input type="number" formControlName="initialBalance" step="0.01" min="0" [style.color]="secondaryColor">
+            </div>
+            
+            <div class="input-group">
+              <label>Savings Goal (Optional)</label>
+              <input type="number" formControlName="goal" step="0.01" min="0" [style.color]="secondaryColor">
+            </div>
+          </div>
+          
+          <button type="submit" class="update-btn" [disabled]="accountForm.invalid || isLoading" 
+                  [style.background-color]="secondaryColor" [style.color]="primaryColor">
+            <span *ngIf="isLoading" class="spinner"></span>
+            {{ isLoading ? 'Creating...' : 'Add Account' }}
+          </button>
+        </form>
+
+        <form [formGroup]="transactionForm" (ngSubmit)="addTransaction()" class="transaction-form">
+          <div class="form-header">
+            <span class="material-icons">receipt</span>
+            <h3>New Transaction</h3>
+          </div>
+          
+          <div class="input-row">
+            <div class="input-group">
+              <label>Account</label>
+              <select formControlName="accountId" [style.color]="primaryColor">
+                <option value="">Select Account</option>
+                <option *ngFor="let account of accounts" [value]="account.id">
+                  {{ account.name }} ({{ formatCurrency(account.balance) }})
+                </option>
+              </select>
+            </div>
+            
+            <div class="input-group">
+              <label>Date</label>
+              <input type="date" formControlName="date" [style.color]="secondaryColor">
+            </div>
+          </div>
+          
+          <div class="input-group">
+            <label>Description</label>
+            <input type="text" formControlName="description" placeholder="What was this transaction for?" [style.color]="secondaryColor">
+          </div>
+          
+          <div class="input-row">
+            <div class="input-group">
+              <label>Amount</label>
+              <input type="number" formControlName="amount" step="0.01" min="0.01" placeholder="0.00" [style.color]="secondaryColor">
+            </div>
+            
+            <div class="input-group">
+              <label>Type</label>
+              <select formControlName="type" [style.color]="primaryColor">
+                <option value="expense">Expense</option>
+                <option value="income">Income</option>
+                <option value="transfer">Transfer</option>
+                <option value="investment">Investment</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="input-row">
+            <div class="input-group">
+              <label>Category</label>
+              <select formControlName="category" [style.color]="primaryColor">
+                <option value="">Select Category</option>
+                <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+              </select>
+            </div>
+            
+            <div class="input-group">
+              <label>Payment Method</label>
+              <select formControlName="paymentMethod" [style.color]="primaryColor">
+                <option value="">Select Method</option>
+                <option *ngFor="let method of paymentMethods" [value]="method">{{ method }}</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="input-row">
+            <div class="input-group">
+              <label>Status</label>
+              <select formControlName="status" [style.color]="primaryColor">
+                <option value="completed">Completed</option>
+                <option value="pending">Pending</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+            
+            <div class="input-group checkbox-group">
+              <label>
+                <input type="checkbox" formControlName="recurring">
+                Recurring Transaction
+              </label>
+            </div>
+          </div>
+          
+          <div class="input-group" *ngIf="transactionForm.get('recurring')?.value">
+            <label>Recurring Frequency</label>
+            <select formControlName="recurringFrequency" [style.color]="primaryColor">
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </div>
+          
+          <div class="input-group">
+            <label>Notes (Optional)</label>
+            <textarea formControlName="notes" placeholder="Additional notes..." [style.color]="secondaryColor"></textarea>
+          </div>
+          
+          <button type="submit" class="update-btn" [disabled]="transactionForm.invalid || isLoading" 
+                  [style.background-color]="secondaryColor" [style.color]="primaryColor">
+            <span *ngIf="isLoading" class="spinner"></span>
+            {{ isLoading ? 'Adding...' : 'Add Transaction' }}
+          </button>
+        </form>
+
+        <form [formGroup]="budgetForm" (ngSubmit)="addBudget()" class="budget-form">
+          <div class="form-header">
+            <span class="material-icons">pie_chart</span>
+            <h3>New Budget</h3>
+          </div>
+          
+          <div class="input-group">
+            <label>Budget Name</label>
+            <input type="text" formControlName="name" placeholder="e.g., Monthly Groceries" [style.color]="secondaryColor">
+          </div>
+          
+          <div class="input-row">
+            <div class="input-group">
+              <label>Category</label>
+              <select formControlName="category" [style.color]="primaryColor">
+                <option value="">Select Category</option>
+                <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+              </select>
+            </div>
+            
+            <div class="input-group">
+              <label>Period</label>
+              <select formControlName="period" [style.color]="primaryColor">
+                <option value="monthly">Monthly</option>
+                <option value="weekly">Weekly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="input-group">
+            <label>Budget Limit</label>
+            <input type="number" formControlName="limit" step="0.01" min="1" placeholder="0.00" [style.color]="secondaryColor">
+          </div>
+          
+          <div class="input-row">
+            <div class="input-group">
+              <label>Start Date</label>
+              <input type="date" formControlName="startDate" [style.color]="secondaryColor">
+            </div>
+            
+            <div class="input-group">
+              <label>End Date</label>
+              <input type="date" formControlName="endDate" [style.color]="secondaryColor">
+            </div>
+          </div>
+          
+          <button type="submit" class="update-btn" [disabled]="budgetForm.invalid || isLoading" 
+                  [style.background-color]="secondaryColor" [style.color]="primaryColor">
+            <span *ngIf="isLoading" class="spinner"></span>
+            {{ isLoading ? 'Creating...' : 'Create Budget' }}
+          </button>
+        </form>
+      </div>
+
+      <div class="stats-container">
+        <div class="insights-section" *ngIf="financeInsights.length">
+          <h3>Financial Insights</h3>
+          <div *ngFor="let insight of financeInsights" class="insight-card" [class]="insight.type">
+            <span class="material-icons insight-icon">insights</span>
+            <p>{{ insight.message }}</p>
+          </div>
+        </div>
+
+        <div class="finance-metrics">
+          <h3>Financial Overview</h3>
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-value" [class.positive]="totalBalance >= 0" [class.negative]="totalBalance < 0">
+                {{ formatCurrency(totalBalance) }}
+              </span>
+              <span class="metric-label">Total Balance</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value positive">{{ formatCurrency(totalIncome) }}</span>
+              <span class="metric-label">Total Income</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value negative">{{ formatCurrency(totalExpenses) }}</span>
+              <span class="metric-label">Total Expenses</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value" [class.positive]="netFlow >= 0" [class.negative]="netFlow < 0">
+                {{ formatCurrency(netFlow) }}
+              </span>
+              <span class="metric-label">Net Cash Flow</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value" [class.positive]="savingsRate >= 0" [class.negative]="savingsRate < 0">
+                {{ savingsRate.toFixed(1) }}%
+              </span>
+              <span class="metric-label">Savings Rate</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value" [class.good]="budgetUtilization <= 100" [class.warning]="budgetUtilization > 100">
+                {{ budgetUtilization.toFixed(1) }}%
+              </span>
+              <span class="metric-label">Budget Utilization</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="accounts-section">
+          <h3>Accounts Summary</h3>
+          <div class="accounts-list">
+            <div *ngFor="let account of accounts" class="account-card">
+              <div class="account-header">
+                <span class="material-icons account-icon">account_balance</span>
+                <div class="account-info">
+                  <h4>{{ account.name }}</h4>
+                  <span class="account-type">{{ account.type | titlecase }}</span>
+                </div>
+              </div>
+              <div class="account-balance">
+                <span class="balance-amount">{{ formatCurrency(account.balance) }}</span>
+                <span class="balance-currency">{{ account.currency }}</span>
+              </div>
+              <div *ngIf="account.goal" class="account-goal">
+                <div class="goal-progress">
+                  <div class="goal-fill" [style.width]="getGoalProgress(account) + '%'"></div>
+                </div>
+                <span class="goal-text">Goal: {{ formatCurrency(account.goal) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button (click)="resetFinanceTracker()" class="reset-btn" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+        Reset All Financial Data
+      </button>
+    </div>
+
+    <div class="right-column">
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label>Type:</label>
+          <select [(ngModel)]="filterType" (change)="filterTransactions()" class="filter-select" [style.color]="primaryColor">
+            <option value="all">All Types</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+            <option value="transfer">Transfer</option>
+            <option value="investment">Investment</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label>Category:</label>
+          <select [(ngModel)]="filterCategory" (change)="filterTransactions()" class="filter-select" [style.color]="primaryColor">
+            <option value="all">All Categories</option>
+            <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label>Account:</label>
+          <select [(ngModel)]="filterAccount" (change)="filterTransactions()" class="filter-select" [style.color]="primaryColor">
+            <option value="all">All Accounts</option>
+            <option *ngFor="let account of accounts" [value]="account.id">
+              {{ account.name }}
+            </option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label>From:</label>
+          <input type="date" [(ngModel)]="filterDateFrom" (change)="filterTransactions()" class="filter-date" [style.color]="secondaryColor">
+        </div>
+        
+        <div class="filter-group">
+          <label>To:</label>
+          <input type="date" [(ngModel)]="filterDateTo" (change)="filterTransactions()" class="filter-date" [style.color]="secondaryColor">
+        </div>
+      </div>
+
+      <div class="entries-header">
+        <h3>Transaction History</h3>
+        <span class="entries-count" *ngIf="filteredTransactions.length">
+          Showing {{ getDisplayedTransactions().length }} of {{ filteredTransactions.length }} transactions
+        </span>
+      </div>
+      
+      <div class="entries-container" *ngIf="filteredTransactions.length">
+        <table class="transactions-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Category</th>
+              <th>Type</th>
+              <th>Account</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let transaction of getDisplayedTransactions()">
+              <td>
+                <div class="transaction-date">{{ transaction.date }}</div>
+                <div class="transaction-days" *ngIf="getDaysAgo(transaction.date) <= 7">
+                  <small>{{ getDaysAgo(transaction.date) }} days ago</small>
+                </div>
+              </td>
+              <td>
+                <div class="transaction-description">{{ transaction.description }}</div>
+                <div class="transaction-notes" *ngIf="transaction.notes">
+                  <small>📝 {{ transaction.notes }}</small>
+                </div>
+                <div class="transaction-recurring" *ngIf="transaction.recurring">
+                  <small>🔄 {{ transaction.recurringFrequency }}</small>
+                </div>
+              </td>
+              <td>{{ transaction.category }}</td>
+              <td>
+                <span class="type-badge" [style.background-color]="getTransactionTypeColor(transaction.type) + '20'" 
+                      [style.color]="getTransactionTypeColor(transaction.type)">
+                  {{ transaction.type }}
+                </span>
+              </td>
+              <td>
+                {{ getAccountName(transaction) }}
+              </td>
+              <td>
+                <span class="amount-display" [class.positive]="transaction.type === 'income'" 
+                      [class.negative]="transaction.type === 'expense'">
+                  {{ transaction.type === 'expense' ? '-' : '+' }}{{ formatCurrency(transaction.amount) }}
+                </span>
+              </td>
+              <td>
+                <span class="status-badge" [style.background-color]="getStatusColor(transaction.status) + '20'" 
+                      [style.color]="getStatusColor(transaction.status)">
+                  {{ transaction.status }}
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="action-btn" (click)="deleteTransaction(getTransactionAccountId(transaction), transaction.id)">
+                    <span class="material-icons">delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="pagination" *ngIf="totalPages > 1">
+          <button class="pagination-button" (click)="previousPage()" [disabled]="currentPage === 1">
+            <span class="material-icons">chevron_left</span>
+          </button>
+          
+          <button *ngFor="let page of getPageNumbers()" 
+                  class="pagination-button" 
+                  [class.active]="page === currentPage"
+                  (click)="goToPage(page)">
+            {{ page }}
+          </button>
+          
+          <button class="pagination-button" (click)="nextPage()" [disabled]="currentPage === totalPages">
+            <span class="material-icons">chevron_right</span>
+          </button>
+          
+          <span class="pagination-info">
+            Page {{ currentPage }} of {{ totalPages }}
+          </span>
+        </div>
+      </div>
+      
+      <div *ngIf="!filteredTransactions.length && !isLoading" class="empty-state">
+        <p>No transactions found. Start by adding an account and your first transaction!</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="save-notification" *ngIf="showSaveNotification">
+    <span class="material-icons">check_circle</span>
+    Saved successfully!
+  </div>
+</div>

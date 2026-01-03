@@ -1,0 +1,332 @@
+<div class="water-tracker-container" [style.background-color]="primaryColor" [style.color]="secondaryColor">
+  <div class="header-section">
+    <span class="material-icons tracker-icon" [style.color]="secondaryColor">water_drop</span>
+    <h2 class="title">Water Intake Tracker</h2>
+  </div>
+
+  <div class="water-main-layout">
+    <div class="left-column">
+      <div class="forms-container">
+        <form [formGroup]="intakeForm" (ngSubmit)="addIntake()" class="intake-form">
+          <div class="form-header">
+            <span class="material-icons">add_circle</span>
+            <h3>Log Water Intake</h3>
+          </div>
+          
+          <div class="input-row">
+            <div class="input-group">
+              <label>Date</label>
+              <input type="date" formControlName="date" [style.color]="secondaryColor">
+            </div>
+            
+            <div class="input-group">
+              <label>Time</label>
+              <input type="time" formControlName="time" [style.color]="secondaryColor">
+            </div>
+          </div>
+          
+          <div class="input-row">
+            <div class="input-group">
+              <label>Amount</label>
+              <input type="number" formControlName="amount" step="50" min="1" max="5000" placeholder="250" [style.color]="secondaryColor">
+            </div>
+            
+            <div class="input-group">
+              <label>Unit</label>
+              <select formControlName="unit" [style.color]="primaryColor">
+                <option *ngFor="let unit of unitTypes" [value]="unit.value">{{ unit.label }}</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="input-row">
+            <div class="input-group">
+              <label>Type</label>
+              <select formControlName="type" [style.color]="primaryColor">
+                <option *ngFor="let waterType of waterTypes" [value]="waterType.value">{{ waterType.label }}</option>
+              </select>
+            </div>
+            
+            <div class="input-group">
+              <label>Temperature</label>
+              <select formControlName="temperature" [style.color]="primaryColor">
+                <option *ngFor="let temp of temperatureTypes" [value]="temp.value">{{ temp.label }}</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="input-group">
+            <label>Notes (Optional)</label>
+            <textarea formControlName="notes" placeholder="Any notes about this intake..." [style.color]="secondaryColor"></textarea>
+          </div>
+          
+          <button type="submit" class="update-btn" [disabled]="intakeForm.invalid || isLoading" 
+                  [style.background-color]="secondaryColor" [style.color]="primaryColor">
+            <span *ngIf="isLoading" class="spinner"></span>
+            {{ isLoading ? 'Logging...' : 'Log Intake' }}
+          </button>
+        </form>
+
+        <!-- Goal Form -->
+        <form [formGroup]="goalForm" (ngSubmit)="updateGoal()" class="goal-form">
+          <div class="form-header">
+            <span class="material-icons">flag</span>
+            <h3>Hydration Goals</h3>
+          </div>
+          
+          <div class="input-group">
+            <label>Daily Water Goal</label>
+            <input type="number" formControlName="dailyGoal" step="100" min="500" max="10000" 
+                   placeholder="2000" [style.color]="secondaryColor">
+          </div>
+          
+          <div class="input-row">
+            <div class="input-group">
+              <label>Unit</label>
+              <select formControlName="unit" [style.color]="primaryColor">
+                <option *ngFor="let unit of unitTypes" [value]="unit.value">{{ unit.label }}</option>
+              </select>
+            </div>
+            
+            <div class="input-group">
+              <label>Reminder (min)</label>
+              <input type="number" formControlName="reminderFrequency" step="15" min="30" max="360" 
+                     placeholder="120" [style.color]="secondaryColor">
+            </div>
+          </div>
+          
+          <button type="submit" class="update-btn" [disabled]="goalForm.invalid || isLoading" 
+                  [style.background-color]="secondaryColor" [style.color]="primaryColor">
+            <span *ngIf="isLoading" class="spinner"></span>
+            {{ isLoading ? 'Updating...' : 'Update Goals' }}
+          </button>
+        </form>
+
+        <!-- Quick Log Buttons -->
+        <div class="quick-log-section">
+          <div class="form-header">
+            <span class="material-icons">bolt</span>
+            <h3>Quick Log</h3>
+          </div>
+          
+          <div class="quick-buttons">
+            <button class="quick-btn" (click)="logQuickIntake(250, 'ml', 'water')" 
+                    [style.background-color]="secondaryColor" [style.color]="primaryColor">
+              💧 250ml Water
+            </button>
+            <button class="quick-btn" (click)="logQuickIntake(500, 'ml', 'water')" 
+                    [style.background-color]="secondaryColor" [style.color]="primaryColor">
+              💧 500ml Water
+            </button>
+            <button class="quick-btn" (click)="logQuickIntake(1, 'cups', 'coffee')" 
+                    [style.background-color]="secondaryColor" [style.color]="primaryColor">
+              ☕ 1 Cup Coffee
+            </button>
+            <button class="quick-btn" (click)="logQuickIntake(300, 'ml', 'tea')" 
+                    [style.background-color]="secondaryColor" [style.color]="primaryColor">
+              🍵 300ml Tea
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-container">
+        <div class="insights-section" *ngIf="waterInsights.length">
+          <h3>Hydration Insights</h3>
+          <div *ngFor="let insight of waterInsights" class="insight-card" [class]="insight.type">
+            <span class="material-icons insight-icon">insights</span>
+            <p>{{ insight.message }}</p>
+          </div>
+        </div>
+
+        <div class="progress-section">
+          <h3>Today's Progress</h3>
+          <div class="progress-card">
+            <div class="progress-header">
+              <span class="progress-label">Daily Goal: {{ formatAmount(dailyGoal) }}</span>
+              <span class="progress-percentage">{{ goalProgress.toFixed(1) }}%</span>
+            </div>
+            
+            <div class="progress-bar-large">
+              <div class="progress-fill-large" [style.width]="goalProgress + '%'" 
+                   [style.background-color]="getProgressColor(goalProgress)"></div>
+            </div>
+            
+            <div class="progress-details">
+              <div class="progress-detail">
+                <span class="detail-label">Consumed</span>
+                <span class="detail-value">{{ formatAmount(todayTotal) }}</span>
+              </div>
+              <div class="progress-detail">
+                <span class="detail-label">Remaining</span>
+                <span class="detail-value">{{ formatAmount(dailyGoal - todayTotal) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hydration-metrics">
+          <h3>Hydration Metrics</h3>
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-value" [style.color]="getProgressColor(goalProgress)">
+                {{ goalProgress.toFixed(1) }}%
+              </span>
+              <span class="metric-label">Today's Progress</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value" [style.color]="streakDays >= 7 ? '#10b981' : streakDays >= 3 ? '#3b82f6' : '#f59e0b'">
+                {{ streakDays }} days
+              </span>
+              <span class="metric-label">Current Streak</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value" [style.color]="hydrationScore >= 90 ? '#10b981' : hydrationScore >= 70 ? '#3b82f6' : '#f59e0b'">
+                {{ hydrationScore }}/100
+              </span>
+              <span class="metric-label">Hydration Score</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value">{{ formatAmount(weeklyAverage) }}</span>
+              <span class="metric-label">Weekly Average</span>
+            </div>
+          </div>
+        </div>
+        <div class="weekly-history">
+          <h3>Last 7 Days</h3>
+          <div class="week-days">
+            <div *ngFor="let day of weeklyHistory" class="day-card" [class]="day.status">
+              <div class="day-header">
+                <span class="day-name">{{ getDayName(day.date) }}</span>
+                <span class="day-icon">{{ getStatusIcon(day.status) }}</span>
+              </div>
+              <div class="day-progress">
+                <div class="day-progress-bar">
+                  <div class="day-progress-fill" [style.width]="day.progress + '%'"></div>
+                </div>
+                <span class="day-amount">{{ formatAmount(day.totalAmount) }}</span>
+              </div>
+              <div class="day-entries">{{ day.entries.length }} entries</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button (click)="resetWaterTracker()" class="reset-btn" [style.background-color]="secondaryColor" [style.color]="primaryColor">
+        Reset All Water Data
+      </button>
+    </div>
+
+    <div class="right-column">
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label>Date:</label>
+          <select [(ngModel)]="filterDate" (change)="filterIntakes()" class="filter-select" [style.color]="primaryColor">
+            <option value="all">All Dates</option>
+            <option value="{{ today }}">Today</option>
+            <option *ngFor="let date of getUniqueDates()" [value]="date">
+              {{ formatDateForDisplay(date) }}
+            </option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label>Type:</label>
+          <select [(ngModel)]="filterType" (change)="filterIntakes()" class="filter-select" [style.color]="primaryColor">
+            <option value="all">All Types</option>
+            <option *ngFor="let waterType of waterTypes" [value]="waterType.value">{{ waterType.label }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="entries-header">
+        <h3>Intake History</h3>
+        <span class="entries-count" *ngIf="getFilteredIntakes().length">
+          Showing {{ getDisplayedIntakes().length }} of {{ getFilteredIntakes().length }} entries
+        </span>
+      </div>
+      
+      <div class="entries-container" *ngIf="getFilteredIntakes().length">
+        <table class="intake-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Temperature</th>
+              <th>Date</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let intake of getDisplayedIntakes()">
+              <td>
+                <div class="intake-time">{{ formatTime(intake.time) }}</div>
+              </td>
+              <td>
+                <div class="intake-type">
+                  <span class="type-icon">{{ getWaterTypeIcon(intake.type) }}</span>
+                  {{ intake.type | titlecase }}
+                </div>
+              </td>
+              <td>
+                <span class="intake-amount">{{ intake.amount }} {{ intake.unit }}</span>
+                <div class="intake-ml">({{ convertToMl(intake.amount, intake.unit) }} ml)</div>
+              </td>
+              <td>
+                <span class="temperature-badge">
+                  {{ getTemperatureIcon(intake.temperature) }} {{ intake.temperature | titlecase }}
+                </span>
+              </td>
+              <td>
+                <div class="intake-date">{{ formatDateForDisplay(intake.date) }}</div>
+                <div *ngIf="intake.date === today" class="intake-today">Today</div>
+              </td>
+              <td>
+                <div class="intake-notes">{{ intake.notes || '-' }}</div>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="action-btn" (click)="deleteIntake(intake.id)">
+                    <span class="material-icons">delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="pagination" *ngIf="totalPages > 1">
+          <button class="pagination-button" (click)="previousPage()" [disabled]="currentPage === 1">
+            <span class="material-icons">chevron_left</span>
+          </button>
+          
+          <button *ngFor="let page of getPageNumbers()" 
+                  class="pagination-button" 
+                  [class.active]="page === currentPage"
+                  (click)="goToPage(page)">
+            {{ page }}
+          </button>
+          
+          <button class="pagination-button" (click)="nextPage()" [disabled]="currentPage === totalPages">
+            <span class="material-icons">chevron_right</span>
+          </button>
+          
+          <span class="pagination-info">
+            Page {{ currentPage }} of {{ totalPages }}
+          </span>
+        </div>
+      </div>
+      
+      <div *ngIf="!getFilteredIntakes().length && !isLoading" class="empty-state">
+        <p>No water intake entries found. Start by logging your first glass! 💧</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="save-notification" *ngIf="showSaveNotification">
+    <span class="material-icons">check_circle</span>
+    Saved successfully!
+  </div>
+</div>
