@@ -1,0 +1,205 @@
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div class="main-container">
+  <app-drawer-menu
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [role]="role"
+    (drawerStateChange)="onDrawerStateChange($event)"
+  ></app-drawer-menu>
+  <app-header
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [role]="role"
+    [isDrawerOpen]="isDrawerOpen"
+  ></app-header>
+  
+  <div *ngIf="isLoading" class="loading-overlay animate-fade-in">
+    <div class="loading-content">
+      <div class="ai-loader">
+        <div class="ai-pulse" [style.background]="primaryColor"></div>
+        <div class="ai-particle" *ngFor="let particle of aiParticles" [style]="particle"></div>
+        <i class="fas fa-brain" [style.color]="primaryColor"></i>
+      </div>
+      <h3 [style.color]="primaryColor">AI is analyzing your data...</h3>
+      <div class="loading-progress">
+        <div class="progress-bar" [style.width]="loadingProgress + '%'" [style.background]="primaryColor"></div>
+      </div>
+      <p class="loading-tip" [style.color]="secondaryColor">{{loadingTips[currentTip]}}</p>
+    </div>
+  </div>
+
+  <div class="content-container animate-slide-in" [ngClass]="{ 'drawer-open': isDrawerOpen }">
+    <div class="dashboard-header">
+      <h1 
+          class="gradient-text animate-pulse" [style.color]="primaryColor">
+        <i class="fas fa-chart-network"></i> Statistics Dashboard
+      </h1>
+      
+      <div class="dashboard-controls">
+        <button class="ai-toggle-btn" [style.background]="primaryColor" (click)="toggleAIInsights()">
+          <i class="fas" [class.fa-robot]="!showAIInsights" [class.fa-brain]="showAIInsights"></i>
+          {{showAIInsights ? 'Hide AI Insights' : 'Show AI Insights'}}
+        </button>
+        
+        <button class="refresh-btn" [style.background]="secondaryColor" (click)="refreshData()">
+          <i class="fas fa-sync-alt" [class.spinning]="isRefreshing"></i> Refresh Data
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="showAIInsights && aiSummary" class="ai-summary animate-fade-in">
+      <div class="ai-header">
+        <i class="fas fa-lightbulb" [style.color]="primaryColor"></i>
+        <h3>AI Insights Summary</h3>
+        <span class="ai-badge" [style.background]="secondaryColor">Powered by AI</span>
+      </div>
+      <p [innerHTML]="aiSummary"></p>
+      <div class="ai-actions">
+        <button class="ai-action-btn" [style.border-color]="primaryColor" (click)="generateReport()">
+          <i class="fas fa-file-pdf"></i> Generate Report
+        </button>
+        <button class="ai-action-btn" [style.border-color]="secondaryColor" (click)="shareInsights()">
+          <i class="fas fa-share-alt"></i> Share Insights
+        </button>
+      </div>
+    </div>
+
+    <div class="chart-grid" cdkDropList (cdkDropListDropped)="drop($event)">
+      <div class="chart-section animate-fade-in" 
+           *ngFor="let chart of chartOrder; let i = index" 
+           cdkDrag
+           [style.animation-delay]="(i * 0.1) + 's'"
+           [class.dragging]="chart.isDragging"
+           [class.highlighted]="highlightedChart === chart.type">
+        
+        <div class="chart-header">
+          <div class="chart-title">
+            <i class="material-icons" [style.color]="primaryColor">{{chart.icon}}</i>
+            <h2 [style.color]="primaryColor">{{chart.title}}</h2>
+            <span class="chart-badge" [style.background]="secondaryColor">
+              {{getChartType(chart.type)}}
+            </span>
+          </div>
+          
+          <div class="chart-actions">
+            <button class="chart-action-btn" (click)="toggleFullscreen(chart.type)" 
+                    [style.color]="primaryColor" title="Fullscreen">
+              <i class="fas fa-expand"></i>
+            </button>
+            <button class="chart-action-btn" (click)="downloadChart(chart.type)" 
+                    [style.color]="primaryColor" title="Download">
+              <i class="fas fa-download"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <ng-container [ngSwitch]="chart.type">
+            <div *ngSwitchCase="'finance'" class="chart-wrapper">
+              <canvas #financeCanvas width="400" height="300"></canvas>
+              <div *ngIf="!financeData.data.length" class="no-data">
+                <i class="fas fa-coins"></i>
+                <p>No financial data available</p>
+              </div>
+            </div>
+            
+            <div *ngSwitchCase="'water'" class="chart-wrapper">
+              <canvas #waterCanvas width="400" height="250"></canvas>
+              <div *ngIf="!waterData.data.length" class="no-data">
+                <i class="fas fa-tint"></i>
+                <p>No water intake data</p>
+              </div>
+            </div>
+            
+            <div *ngSwitchCase="'reading'" class="chart-wrapper">
+              <canvas #readingCanvas width="400" height="250"></canvas>
+              <div *ngIf="!readingData.data.length" class="no-data">
+                <i class="fas fa-book"></i>
+                <p>No reading data</p>
+              </div>
+            </div>
+            
+            <div *ngSwitchCase="'mood'" class="chart-wrapper">
+              <canvas #moodCanvas width="400" height="250"></canvas>
+              <div *ngIf="!moodData.data.length" class="no-data">
+                <i class="fas fa-smile"></i>
+                <p>No mood data</p>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+
+        <div class="chart-stats" *ngIf="getChartStats(chart.type) as stats">
+          <div class="stat-item" *ngFor="let stat of stats">
+            <span class="stat-label">{{stat.label}}</span>
+            <span class="stat-value" [style.color]="primaryColor">{{stat.value}}</span>
+          </div>
+        </div>
+
+        <div *ngIf="showAIInsights && getChartInsight(chart.type) as insight" 
+             class="ai-insight animate-slide-up">
+          <div class="insight-header">
+            <i class="fas fa-robot" [style.color]="secondaryColor"></i>
+            <h4>AI Insight</h4>
+            <span class="confidence" [style.background]="getConfidenceColor(insight.confidence)">
+              {{insight.confidence}}% confidence
+            </span>
+          </div>
+          <p>{{insight.message}}</p>
+          <div class="insight-actions">
+            <button class="insight-btn" [style.background]="primaryColor" 
+                    (click)="applySuggestion(chart.type)">
+              <i class="fas fa-magic"></i> Apply Suggestion
+            </button>
+          </div>
+        </div>
+
+        <div class="drag-handle" cdkDragHandle>
+          <i class="fas fa-arrows-alt" [style.color]="primaryColor"></i>
+        </div>
+
+        <div *ngIf="fullscreenChart === chart.type" class="fullscreen-overlay" (click)="closeFullscreen()">
+          <div class="fullscreen-content" (click)="$event.stopPropagation()">
+            <div class="fullscreen-header">
+              <h3>{{chart.title}}</h3>
+              <button class="close-btn" (click)="closeFullscreen()">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="fullscreen-chart">
+              <canvas [id]="'fullscreen-' + chart.type" width="800" height="500"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="showAIInsights" class="trends-section animate-fade-in">
+      <h3><i class="fas fa-chart-line" [style.color]="primaryColor"></i> Data Trends & Predictions</h3>
+      <div class="trends-grid">
+        <div class="trend-card" *ngFor="let trend of aiTrends">
+          <div class="trend-icon" [style.background]="trend.color + '20'">
+            <i [class]="trend.icon" [style.color]="trend.color"></i>
+          </div>
+          <h4>{{trend.title}}</h4>
+          <p>{{trend.description}}</p>
+          <div class="trend-progress">
+            <div class="progress-track">
+              <div class="progress-fill" [style.width]="trend.progress + '%'" 
+                   [style.background]="trend.color"></div>
+            </div>
+            <span class="progress-value">{{trend.progress}}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-footer
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [isDrawerOpen]="isDrawerOpen"
+  ></app-footer>
+</div>

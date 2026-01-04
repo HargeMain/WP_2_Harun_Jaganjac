@@ -91,6 +91,19 @@
         Password must contain at least one uppercase letter, one special character, and one number
       </small>
 
+      <div class="color-preset">
+       <label>Color Preset</label>
+       <select (change)="onPresetChange($event)" class="preset-select">
+           <option value="custom">Custom</option>
+           <option value="green">Green</option>
+    <option value="blue">Blue</option>
+    <option value="pink">Pink</option>
+    <option value="orange">Orange</option>
+    <option value="dark">Dark</option>
+    <option value="cyberpunk">Cyberpunk</option>
+  </select>
+</div>
+
       <div class="color-picker">
         <label>Primary Color</label>
         <input type="color" formControlName="primaryColor">

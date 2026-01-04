@@ -16,6 +16,11 @@ function passwordValidator(control: AbstractControl): { [key: string]: boolean }
   return valid ? null : { invalidPassword: true };
 }
 
+interface ColorPreset {
+  primary: string;
+  secondary: string;
+}
+
 @Component({
   selector: 'app-register',
   standalone: true,
@@ -39,6 +44,34 @@ export class RegisterComponent implements OnInit {
   isModalOpen = false;
   form!: FormGroup;
 
+
+    colorPresets: { [key: string]: ColorPreset } = {
+    green: {
+      primary: '#10b981',  
+      secondary: '#ffffff' 
+    },
+    blue: {
+      primary: '#3b82f6',  
+      secondary: '#1e40af'
+    },
+    pink: {
+      primary: '#ec4899',  
+      secondary: '#be185d' 
+    },
+    orange: {
+      primary: '#f97316',  
+      secondary: '#ea580c' 
+    },
+    dark: {
+      primary: '#1f2937',  
+      secondary: '#111827' 
+    },
+    cyberpunk: {
+      primary: '#00eeff',  
+      secondary: '#ff00ff' 
+    }
+  };
+
   constructor(private fb: FormBuilder, private auth: AuthService, private cdr: ChangeDetectorRef, private router: Router) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -56,6 +89,14 @@ export class RegisterComponent implements OnInit {
   ngOnInit() {
     const theme = this.getCookie('theme');
     this.isDark = theme === 'dark';
+
+   this.primaryColor?.valueChanges.subscribe(() => {
+      this.resetPresetToCustom();
+    });
+    
+    this.secondaryColor?.valueChanges.subscribe(() => {
+      this.resetPresetToCustom();
+    });
   }
 
   get email() { return this.form.get('email'); }
@@ -67,9 +108,63 @@ export class RegisterComponent implements OnInit {
   get primaryColor() { return this.form.get('primaryColor'); }
   get secondaryColor() { return this.form.get('secondaryColor'); }
 
+  onPresetChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    const preset = select.value;
+    
+    if (preset !== 'custom' && this.colorPresets[preset]) {
+      const colors = this.colorPresets[preset];
+      this.primaryColor?.setValue(colors.primary);
+      this.secondaryColor?.setValue(colors.secondary);
+      
+      this.updateCSSVariables(colors.primary, colors.secondary);
+    }
+  }
+
+  onColorChange(type: 'primary' | 'secondary') {
+    this.updateCSSVariables(
+      this.primaryColor?.value,
+      this.secondaryColor?.value
+    );
+  }
+
+  resetPresetToCustom() {
+    const presetSelect = document.querySelector('.preset-select') as HTMLSelectElement;
+    if (presetSelect) {
+      presetSelect.value = 'custom';
+    }
+  }
+
+  updateCSSVariables(primary: string, secondary: string) {
+    document.documentElement.style.setProperty('--primary', primary);
+    document.documentElement.style.setProperty('--accent', this.adjustColor(primary, 30));
+    
+    if (this.isDark) {
+      document.documentElement.style.setProperty('--primary', primary);
+      document.documentElement.style.setProperty('--accent', this.adjustColor(primary, 40));
+    }
+  }
+
+  private adjustColor(color: string, percent: number): string {
+    let r = parseInt(color.substring(1, 3), 16);
+    let g = parseInt(color.substring(3, 5), 16);
+    let b = parseInt(color.substring(5, 7), 16);
+
+    r = Math.min(255, Math.floor(r * (1 + percent / 100)));
+    g = Math.min(255, Math.floor(g * (1 + percent / 100)));
+    b = Math.min(255, Math.floor(b * (1 + percent / 100)));
+
+    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+  }
+
   toggleTheme() {
     this.isDark = !this.isDark;
     this.setCookie('theme', this.isDark ? 'dark' : 'light', 365);
+
+    this.updateCSSVariables(
+      this.primaryColor?.value,
+      this.secondaryColor?.value
+    );
   }
 
   onDragOver(event: DragEvent) {
