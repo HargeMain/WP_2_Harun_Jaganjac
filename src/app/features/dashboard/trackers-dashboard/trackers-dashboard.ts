@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, HostListener, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DrawerMenu } from '../../../shared/components/drawer-menu/drawer-menu';
 import { HeaderComponent } from '../../../shared/components/header/header';
@@ -51,9 +51,13 @@ export class TrackersDashboardComponent implements OnInit, AfterViewInit {
   primaryColor: string = '#1e3a8a';
   secondaryColor: string = '#ffffff';
   role?: 'admin' | 'user';
+  username?: string = 'User';
+  userId?: string;
   isDrawerOpen = false;
 
   isDragging = false;
+  isReady = false;
+  isLoading = true;
   dragStartIndex = -1;
   dragOverIndex = -1;
   dragGhost: HTMLElement | null = null;
@@ -172,27 +176,42 @@ export class TrackersDashboardComponent implements OnInit, AfterViewInit {
 
   @ViewChild('pathDots', { static: false }) pathDots!: ElementRef;
 
-  ngOnInit() {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      const user: AppUser = JSON.parse(storedUser);
-      this.primaryColor = user.primaryColor || this.primaryColor;
-      this.secondaryColor = user.secondaryColor || this.secondaryColor;
-      this.role = user.role;
-    }
-    
-    const savedOrder = localStorage.getItem('trackersOrder');
-    if (savedOrder) {
-      try {
-        const order = JSON.parse(savedOrder);
-        this.sortTrackersByOrder(order);
-      } catch (e) {
-        console.error('Error loading tracker order:', e);
-      }
-    }
-    
-    this.updateNextPrevNames();
+  constructor(private cdr: ChangeDetectorRef) {
+    this.loadUserPreferences();
   }
+
+  ngOnInit() {
+    this.isLoading = true;
+    this.cdr.detectChanges(); 
+
+    setTimeout(() => {
+      const savedOrder = localStorage.getItem('trackersOrder');
+      if (savedOrder) {
+        try {
+          const order = JSON.parse(savedOrder);
+          this.sortTrackersByOrder(order);
+        } catch (e) {
+          console.error('Error loading tracker order:', e);
+        }
+      }
+      this.updateNextPrevNames();
+      this.isReady = true; 
+      this.isLoading = false;
+      this.cdr.detectChanges(); 
+    }, 0);
+  }
+
+
+  private loadUserPreferences() {
+  const storedUser = localStorage.getItem('user');
+  if (storedUser) {
+    const user: AppUser = JSON.parse(storedUser);
+    this.primaryColor = user.primaryColor || this.primaryColor;
+    this.secondaryColor = user.secondaryColor || this.secondaryColor;
+    this.username = user.name || this.username;
+    this.userId = user.uid;
+  }
+}
 
   ngAfterViewInit() {
     this.initializeDragAndDrop();
@@ -234,7 +253,6 @@ export class TrackersDashboardComponent implements OnInit, AfterViewInit {
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.setData('text/plain', index.toString());
       
-      // Kreiraj custom drag ghost
       const dragGhost = element.cloneNode(true) as HTMLElement;
       dragGhost.style.position = 'absolute';
       dragGhost.style.opacity = '0.8';

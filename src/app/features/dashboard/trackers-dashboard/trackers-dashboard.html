@@ -1,10 +1,12 @@
-<div class="main-container">
+<div class="main-container" *ngIf="!isLoading && isReady; else loadingTemplate">
 
   <app-drawer-menu
     [primaryColor]="primaryColor"
     [secondaryColor]="secondaryColor"
     [role]="role"
     (drawerStateChange)="onDrawerStateChange($event)"
+    [userId]="userId"
+    [userName]="username"
   ></app-drawer-menu>
 
   <app-header
@@ -257,3 +259,12 @@
   ></app-footer>
  
 </div>
+
+<ng-template #loadingTemplate>
+  <div class="loading-container">
+    <div class="loading-spinner">
+      <div class="spinner-circle"></div>
+      <p>Loading dashboard...</p>
+    </div>
+  </div>
+</ng-template>

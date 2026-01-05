@@ -11,28 +11,28 @@ import { CdkDragDrop, CdkDrag, CdkDropList, moveItemInArray } from '@angular/cdk
 import { jsPDF } from 'jspdf';
 
 interface Trackers {
-  financeTracker?: { 
-    accounts: Account[]; 
-    budgets: Budget[]; 
+  financeTracker?: {
+    accounts: Account[];
+    budgets: Budget[];
     lastUpdated: string;
     income?: number;
     expenses?: number;
   };
-  waterIntake?: { 
-    dailyIntakes: WaterIntake[]; 
-    weeklyHistory: DailySummary[]; 
+  waterIntake?: {
+    dailyIntakes: WaterIntake[];
+    weeklyHistory: DailySummary[];
     settings: { goal: number };
-    lastUpdated: string 
+    lastUpdated: string
   };
-  readingTracker?: { 
-    books: Book[]; 
-    readingSessions: ReadingSession[]; 
-    readingGoals: ReadingGoal[]; 
+  readingTracker?: {
+    books: Book[];
+    readingSessions: ReadingSession[];
+    readingGoals: ReadingGoal[];
     lastUpdated: string;
     yearlyGoal?: number;
   };
-  moodTracker?: { 
-    entries: MoodEntry[]; 
+  moodTracker?: {
+    entries: MoodEntry[];
     lastUpdated: string;
     averageMood?: number;
   };
@@ -132,7 +132,8 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
   username?: string;
   userId?: string;
   isDrawerOpen = false;
-  
+  private resizeTimeout?: any;
+
   isLoading: boolean = true;
   isRefreshing: boolean = false;
   loadingProgress: number = 0;
@@ -145,12 +146,12 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
   ];
   currentTip: number = 0;
   aiParticles: any[] = [];
-  
+
   showAIInsights: boolean = true;
   aiInsights: AIInsight[] = [];
   aiSummary: string = '';
   aiTrends: AITrend[] = [];
-  
+
   fullscreenChart: string | null = null;
   highlightedChart: string | null = null;
 
@@ -161,7 +162,7 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
   private waterChart?: Chart;
   private readingChart?: Chart;
   private moodChart?: Chart;
-  
+
   private fullscreenFinanceChart?: Chart;
   private fullscreenWaterChart?: Chart;
   private fullscreenReadingChart?: Chart;
@@ -193,7 +194,7 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
     this.loadUserPreferences();
     this.loadChartOrder();
     this.startLoadingSimulation();
-    
+
     if (this.userId) {
       this.loadTrackers();
     }
@@ -209,14 +210,17 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
   @HostListener('window:resize')
   onResize() {
-    this.updateCharts();
+    clearTimeout(this.resizeTimeout);
+    this.resizeTimeout = setTimeout(() => {
+      this.updateCharts();
+    }, 300);
   }
 
   private startLoadingSimulation() {
     const interval = setInterval(() => {
       this.loadingProgress += 10;
       this.currentTip = Math.floor(Math.random() * this.loadingTips.length);
-      
+
       if (this.loadingProgress >= 100) {
         clearInterval(interval);
         setTimeout(() => {
@@ -260,7 +264,7 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
   private async loadTrackers() {
     if (!this.userId) return;
-    
+
     try {
       const trackers = await this.getTrackers(this.userId);
       this.trackers = trackers;
@@ -294,8 +298,8 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
       const last7Days = water.dailyIntakes
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
         .slice(-7);
-      
-      this.waterData.labels = last7Days.map(d => 
+
+      this.waterData.labels = last7Days.map(d =>
         new Date(d.date).toLocaleDateString('en-US', { weekday: 'short' })
       );
       this.waterData.data = last7Days.map(d => d.amount);
@@ -309,32 +313,44 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
         acc[session.date] = (acc[session.date] || 0) + session.pagesRead;
         return acc;
       }, {});
-      
-      this.readingData.labels = last14Days.map(date => 
+
+      this.readingData.labels = last14Days.map(date =>
         new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
       );
       this.readingData.data = last14Days.map(date => pagesByDate[date] || 0);
       this.readingData.books = reading.books || [];
     }
 
-    // Mood Data
     const mood = this.trackers.moodTracker;
+
     if (mood && mood.entries) {
+      const entriesArray: MoodEntry[] = Array.isArray(mood.entries)
+        ? mood.entries
+        : Object.values(mood.entries);
+
       const last30Days = this.getLastNDays(30);
-      this.moodData.labels = last30Days.map(date => 
+
+      this.moodData.labels = last30Days.map(date =>
         new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
       );
-      const moodByDate = mood.entries.reduce((acc: { [date: string]: number[] }, entry) => {
-        if (!acc[entry.date]) acc[entry.date] = [];
-        acc[entry.date].push(entry.mood);
-        return acc;
-      }, {});
+
+      const moodByDate = entriesArray.reduce(
+        (acc: { [date: string]: number[] }, entry) => {
+          if (!acc[entry.date]) acc[entry.date] = [];
+          acc[entry.date].push(entry.mood);
+          return acc;
+        },
+        {}
+      );
+
       this.moodData.data = last30Days.map(date => {
         const moods = moodByDate[date];
         return moods ? moods.reduce((a, b) => a + b, 0) / moods.length : null;
       });
+
       this.moodData.average = mood.averageMood || 3;
     }
+
   }
 
   private getLastNDays(n: number): string[] {
@@ -349,14 +365,14 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
   private generateAIInsights() {
     this.aiInsights = [];
-    
+
     if (this.financeData.data.length > 0) {
       const totalSpent = this.financeData.data.reduce((a: number, b: number) => a + b, 0);
       const avgSpent = totalSpent / this.financeData.data.length;
-      
+
       let financeMessage = '';
       let confidence = 85;
-      
+
       if (totalSpent > 1000) {
         financeMessage = `You've spent $${totalSpent.toFixed(2)} this month. Consider reviewing discretionary expenses.`;
       } else if (totalSpent < 500) {
@@ -364,7 +380,7 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
       } else {
         financeMessage = `Your spending is moderate at $${totalSpent.toFixed(2)}. Keep tracking to optimize your budget.`;
       }
-      
+
       this.aiInsights.push({
         type: 'finance',
         message: financeMessage,
@@ -377,10 +393,10 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
     if (this.waterData.data.length > 0) {
       const avgWater = this.waterData.data.reduce((a: number, b: number) => a + b, 0) / this.waterData.data.length;
       const goalMet = avgWater >= this.waterData.goal;
-      
+
       this.aiInsights.push({
         type: 'water',
-        message: goalMet 
+        message: goalMet
           ? `Excellent! You're averaging ${avgWater.toFixed(0)}ml daily, meeting your ${this.waterData.goal}ml goal.`
           : `You're averaging ${avgWater.toFixed(0)}ml daily. Try increasing by ${(this.waterData.goal - avgWater).toFixed(0)}ml to reach your goal.`,
         confidence: 92,
@@ -392,7 +408,7 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
     if (this.readingData.data.length > 0) {
       const totalPages = this.readingData.data.reduce((a: number, b: number) => a + b, 0);
       const avgDaily = totalPages / this.readingData.data.filter((d: number) => d > 0).length || 0;
-      
+
       this.aiInsights.push({
         type: 'reading',
         message: `You've read ${totalPages} pages recently. ${avgDaily > 20 ? 'Impressive pace!' : 'Try setting daily reading goals.'}`,
@@ -406,12 +422,12 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
       const nonNull = this.moodData.data.filter((v: number | null): v is number => v !== null);
       const avgMood = nonNull.length > 0 ? nonNull.reduce((a: number, b: number) => a + b, 0) / nonNull.length : 0;
       const trend = this.calculateTrend(nonNull);
-      
+
       let moodMessage = '';
       if (avgMood >= 4) moodMessage = 'Your mood has been consistently positive!';
       else if (avgMood >= 3) moodMessage = 'Your mood is stable and balanced.';
       else moodMessage = 'Consider activities that boost your mood.';
-      
+
       this.aiInsights.push({
         type: 'mood',
         message: `${moodMessage} Average: ${avgMood.toFixed(1)}/5, Trend: ${trend}.`,
@@ -429,28 +445,28 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     const summaryParts: string[] = [];
-    
+
     if (this.financeData.data.length > 0) {
       const totalSpent = this.financeData.data.reduce((a: number, b: number) => a + b, 0);
       summaryParts.push(`<strong>Financial Health:</strong> ${totalSpent > 1000 ? 'Review spending' : 'Good control'}`);
     }
-    
+
     if (this.waterData.data.length > 0) {
       const avgWater = this.waterData.data.reduce((a: number, b: number) => a + b, 0) / this.waterData.data.length;
       summaryParts.push(`<strong>Hydration:</strong> ${avgWater >= this.waterData.goal ? 'Goal met' : 'Needs improvement'}`);
     }
-    
+
     if (this.readingData.data.length > 0) {
       const readingDays = this.readingData.data.filter((d: number) => d > 0).length;
       summaryParts.push(`<strong>Reading:</strong> ${readingDays >= 7 ? 'Consistent' : 'Irregular'} habit`);
     }
-    
+
     if (this.moodData.data.length > 0) {
       const nonNull = this.moodData.data.filter((v: number | null): v is number => v !== null);
       const avgMood: number = nonNull.length > 0 ? nonNull.reduce((a: number, b: number) => a + b, 0) / nonNull.length : 0;
       summaryParts.push(`<strong>Mood:</strong> ${avgMood >= 3.5 ? 'Positive' : 'Needs attention'}`);
     }
-    
+
     this.aiSummary = `Based on your recent activity: ${summaryParts.join(', ')}. 
     <br><br><em>Recommendation:</em> ${this.getOverallRecommendation()}`;
   }
@@ -490,7 +506,7 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
   private getOverallRecommendation(): string {
     const recommendations: string[] = [];
-    
+
     if (this.financeData.data.length === 0) {
       recommendations.push('start tracking expenses');
     }
@@ -503,25 +519,25 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
     if (this.moodData.data.length === 0) {
       recommendations.push('track your mood daily');
     }
-    
+
     if (recommendations.length === 0) {
       return 'Continue your current habits and consider setting higher goals for continuous improvement.';
     }
-    
+
     return `Focus on ${recommendations.join(', ')} to get the most from your dashboard.`;
   }
 
   private calculateTrend(data: number[]): string {
     if (data.length < 2) return 'insufficient data';
-    
+
     const firstHalf = data.slice(0, Math.floor(data.length / 2));
     const secondHalf = data.slice(Math.floor(data.length / 2));
-    
+
     const avgFirst = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
     const avgSecond = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
-    
+
     const difference = avgSecond - avgFirst;
-    
+
     if (difference > 0.5) return 'significantly improving';
     if (difference > 0.1) return 'improving';
     if (difference < -0.5) return 'declining';
@@ -540,10 +556,15 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
   private createFinanceChart() {
     if (!this.financeCanvas || this.financeData.data.length === 0) return;
-    
+
+    if (this.financeChart) {
+      this.financeChart.destroy();
+      this.financeChart = undefined;
+    }
+
     const ctx = this.financeCanvas.nativeElement.getContext('2d');
     if (!ctx) return;
-    
+
     this.financeChart = new Chart(ctx, {
       type: 'doughnut',
       data: {
@@ -602,14 +623,20 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
   private createWaterChart() {
     if (!this.waterCanvas || this.waterData.data.length === 0) return;
-    
+
+
+    if (this.waterChart) {
+      this.waterChart.destroy();
+      this.waterChart = undefined;
+    }
+
     const ctx = this.waterCanvas.nativeElement.getContext('2d');
     if (!ctx) return;
-    
+
     const gradient = ctx.createLinearGradient(0, 0, 0, 250);
     gradient.addColorStop(0, this.primaryColor + 'CC');
     gradient.addColorStop(1, this.primaryColor + '33');
-    
+
     this.waterChart = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -666,14 +693,19 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
   private createReadingChart() {
     if (!this.readingCanvas || this.readingData.data.length === 0) return;
-    
+
+    if (this.readingChart) {
+      this.readingChart.destroy();
+      this.readingChart = undefined;
+    }
+
     const ctx = this.readingCanvas.nativeElement.getContext('2d');
     if (!ctx) return;
-    
+
     const gradient = ctx.createLinearGradient(0, 0, 0, 250);
     gradient.addColorStop(0, this.primaryColor + 'DD');
     gradient.addColorStop(1, this.primaryColor + '44');
-    
+
     this.readingChart = new Chart(ctx, {
       type: 'line',
       data: {
@@ -721,14 +753,19 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
   private createMoodChart() {
     if (!this.moodCanvas || this.moodData.data.length === 0) return;
-    
+
+    if (this.moodChart) {
+      this.moodChart.destroy();
+      this.moodChart = undefined;
+    }
+
     const ctx = this.moodCanvas.nativeElement.getContext('2d');
     if (!ctx) return;
-    
+
     const gradient = ctx.createLinearGradient(0, 0, 0, 250);
     gradient.addColorStop(0, this.secondaryColor + 'CC');
     gradient.addColorStop(1, this.secondaryColor + '33');
-    
+
     this.moodChart = new Chart(ctx, {
       type: 'line',
       data: {
@@ -794,10 +831,10 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
   drop(event: CdkDragDrop<ChartConfig[]>) {
     moveItemInArray(this.chartOrder, event.previousIndex, event.currentIndex);
     this.saveChartOrder();
-    
+
     this.chartOrder.forEach(chart => chart.isDragging = false);
     this.highlightedChart = this.chartOrder[event.currentIndex].type;
-    
+
     setTimeout(() => {
       this.highlightedChart = null;
     }, 1000);
@@ -811,7 +848,7 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
   async refreshData() {
     this.isRefreshing = true;
     this.loadingProgress = 0;
-    
+
     const interval = setInterval(() => {
       this.loadingProgress += 20;
       if (this.loadingProgress >= 100) {
@@ -842,10 +879,10 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
     const canvasId = `fullscreen-${chartType}`;
     const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
     if (!canvas) return;
-    
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
+
     switch (chartType) {
       case 'finance':
         this.createFullscreenFinanceChart(ctx);
@@ -898,7 +935,7 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
     const gradient = ctx.createLinearGradient(0, 0, 0, 500);
     gradient.addColorStop(0, this.primaryColor + 'CC');
     gradient.addColorStop(1, this.primaryColor + '33');
-    
+
     this.fullscreenWaterChart = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -928,7 +965,7 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
     const gradient = ctx.createLinearGradient(0, 0, 0, 500);
     gradient.addColorStop(0, this.primaryColor + 'DD');
     gradient.addColorStop(1, this.primaryColor + '44');
-    
+
     this.fullscreenReadingChart = new Chart(ctx, {
       type: 'line',
       data: {
@@ -962,7 +999,7 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
     const gradient = ctx.createLinearGradient(0, 0, 0, 500);
     gradient.addColorStop(0, this.secondaryColor + 'CC');
     gradient.addColorStop(1, this.secondaryColor + '33');
-    
+
     this.fullscreenMoodChart = new Chart(ctx, {
       type: 'line',
       data: {
@@ -995,7 +1032,7 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
   downloadChart(chartType: string) {
     const canvas = this.getChartCanvas(chartType);
     if (!canvas) return;
-    
+
     const link = document.createElement('a');
     link.download = `${chartType}-chart-${new Date().toISOString().split('T')[0]}.png`;
     link.href = canvas.toDataURL('image/png');
@@ -1015,15 +1052,15 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
   async generateReport() {
     const doc = new jsPDF();
     const date = new Date().toLocaleDateString();
-    
+
     doc.setFontSize(24);
     doc.setTextColor(...this.hexToRgb(this.primaryColor));
     doc.text('Personal Statistics Report', 105, 20, { align: 'center' });
-    
+
     doc.setFontSize(12);
     doc.setTextColor(100);
     doc.text(`Generated on ${date}`, 105, 30, { align: 'center' });
-    
+
     let yPos = 40;
     const chartPromises = this.chartOrder.map(async (chart, index) => {
       const canvas = this.getChartCanvas(chart.type);
@@ -1033,14 +1070,14 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
         yPos += 90;
       }
     });
-    
+
     await Promise.all(chartPromises);
-    
+
     doc.addPage();
     doc.setFontSize(18);
     doc.setTextColor(...this.hexToRgb(this.primaryColor));
     doc.text('AI Insights Summary', 20, 20);
-    
+
     doc.setFontSize(12);
     doc.setTextColor(60);
     const splitText = doc.splitTextToSize(this.aiSummary.replace(/<[^>]*>/g, ''), 170);
@@ -1067,16 +1104,13 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
   applySuggestion(chartType: string) {
     const insight = this.aiInsights.find(i => i.type === chartType);
     if (!insight) return;
-    
-    if (confirm(`Apply AI suggestion for ${chartType}?`)) {
+
       console.log(`Applying suggestion for ${chartType}:`, insight.suggestion);
-      
+
       this.highlightedChart = chartType;
       setTimeout(() => {
         this.highlightedChart = null;
-        alert(`Suggestion applied for ${chartType}!`);
       }, 1500);
-    }
   }
 
   getChartType(chartType: string): string {
@@ -1099,7 +1133,7 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
           { label: 'Avg/Week', value: `$${avgSpent.toFixed(2)}` },
           { label: 'Categories', value: this.financeData.labels.length.toString() }
         ];
-      
+
       case 'water':
         const totalWater = this.waterData.data.reduce((a: number, b: number) => a + b, 0);
         const avgWater = this.waterData.data.length > 0 ? totalWater / this.waterData.data.length : 0;
@@ -1109,7 +1143,7 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
           { label: 'Goal Progress', value: `${goalPercentage}%` },
           { label: 'Total', value: `${totalWater.toFixed(0)}ml` }
         ];
-      
+
       case 'reading':
         const totalPages = this.readingData.data.reduce((a: number, b: number) => a + b, 0);
         const readingDays = this.readingData.data.filter((d: number) => d > 0).length;
@@ -1119,7 +1153,7 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
           { label: 'Reading Days', value: readingDays.toString() },
           { label: 'Current Streak', value: `${streak} days` }
         ];
-      
+
       case 'mood':
         const nonNull = this.moodData.data.filter((v: number | null): v is number => v !== null);
         const avgMood = nonNull.length > 0 ? nonNull.reduce((a: number, b: number) => a + b, 0) / nonNull.length : 0;
@@ -1130,7 +1164,7 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
           { label: 'Best Day', value: bestDay.toFixed(1) },
           { label: 'Consistency', value: `${consistency}%` }
         ];
-      
+
       default:
         return [];
     }
@@ -1166,23 +1200,28 @@ export class StatisticPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
   private updateCharts() {
     this.destroyAllCharts();
-    setTimeout(() => {
-      this.createCharts();
-    }, 100);
+    this.createCharts();
   }
 
   private destroyAllCharts() {
-    [
-      this.financeChart,
-      this.waterChart,
-      this.readingChart,
-      this.moodChart,
-      this.fullscreenFinanceChart,
-      this.fullscreenWaterChart,
-      this.fullscreenReadingChart,
-      this.fullscreenMoodChart
-    ].forEach(chart => chart?.destroy());
+    if (this.financeChart) {
+      this.financeChart.destroy();
+      this.financeChart = undefined;
+    }
+    if (this.waterChart) {
+      this.waterChart.destroy();
+      this.waterChart = undefined;
+    }
+    if (this.readingChart) {
+      this.readingChart.destroy();
+      this.readingChart = undefined;
+    }
+    if (this.moodChart) {
+      this.moodChart.destroy();
+      this.moodChart = undefined;
+    }
   }
+
 
   private destroyFullscreenCharts() {
     [

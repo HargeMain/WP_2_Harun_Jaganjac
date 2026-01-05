@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Firestore, doc, setDoc, updateDoc, getDoc } from '@angular/fire/firestore';
 import { Trackers } from '../models/trackers.model';
+import { TrackerTable } from '../models/tracker_table.model';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +24,7 @@ export class TrackersService {
       financeTracker: [],
       gratitudeJournal: [],
       dailyReflection: [],
-      waterIntake:  [],
+      waterIntake: [],
       readingTracker: [],
     };
 
@@ -67,4 +68,45 @@ export class TrackersService {
     const snap = await getDoc(trackerRef);
     return snap.exists() ? (snap.data() as Trackers) : null;
   }
+
+  async getAllTrackersAsTables(userId: string): Promise<TrackerTable[]> {
+    const trackers = await this.getTrackers(userId);
+    if (!trackers) return [];
+
+    const result: TrackerTable[] = [];
+
+    Object.entries(trackers).forEach(([trackerName, value]) => {
+
+      if (trackerName === 'userId') return;
+
+      let rows: any[] = [];
+      let isEmpty = true;
+
+      if (Array.isArray(value)) {
+        rows = value;
+        isEmpty = value.length === 0;
+      }
+      else if (typeof value === 'object' && value !== null) {
+        rows = Object.entries(value).map(([key, val]) => ({
+          key,
+          value: val
+        }));
+        isEmpty = Object.keys(value).length === 0;
+      }
+      else if (value !== undefined && value !== null) {
+        rows = [{ value }];
+        isEmpty = false;
+      }
+
+      result.push({
+        trackerName,
+        isEmpty,
+        rowCount: rows.length,
+        rows
+      });
+    });
+
+    return result;
+  }
+
 }

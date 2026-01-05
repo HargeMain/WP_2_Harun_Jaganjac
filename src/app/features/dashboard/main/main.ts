@@ -17,6 +17,7 @@ export class MainPageComponent implements OnInit {
   secondaryColor?: string;
   role?: 'admin' | 'user';
   username?: string;
+  userId?: string;
   isDrawerOpen = false;
 
   ngOnInit() {
@@ -26,6 +27,7 @@ export class MainPageComponent implements OnInit {
       this.primaryColor = user.primaryColor;
       this.secondaryColor = user.secondaryColor;
       this.role = user.role;
+      this.userId = user.uid;
       this.username = user.name;
     }
   }

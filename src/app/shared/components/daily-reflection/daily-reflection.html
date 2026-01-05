@@ -103,7 +103,8 @@
                                     <span class="material-icons">add</span>
                                 </button>
                             </div>
-                            <div *ngFor="let win of wins.controls; let i = index" class="question-item">
+                            <div formArrayName="wins">
+                               <div *ngFor="let win of wins.controls; let i = index" class="question-item">
                                 <textarea [formControlName]="i" placeholder="Something positive that happened..." 
                                                  rows="2" [style.color]="primaryColor"></textarea>
                                 <button *ngIf="wins.controls.length > 1" type="button" class="remove-item-btn" 
@@ -112,6 +113,7 @@
                                 </button>
                             </div>
                         </div>
+                    </div>
                         
                         <div class="question-section">
                             <div class="question-header">
@@ -121,13 +123,15 @@
                                     <span class="material-icons">add</span>
                                 </button>
                             </div>
-                            <div *ngFor="let challenge of challenges.controls; let i = index" class="question-item">
-                                <textarea [formControlName]="i" placeholder="Something that was difficult..." 
-                                                 rows="2" [style.color]="primaryColor"></textarea>
-                                <button *ngIf="challenges.controls.length > 1" type="button" class="remove-item-btn" 
-                                                (click)="removeChallenge(i)">
-                                    <span class="material-icons">remove</span>
-                                </button>
+                            <div formArrayName="challenges">
+                                <div *ngFor="let challenge of challenges.controls; let i = index" class="question-item">
+                                    <textarea [formControlName]="i" placeholder="Something that was difficult..." 
+                                                     rows="2" [style.color]="primaryColor"></textarea>
+                                    <button *ngIf="challenges.controls.length > 1" type="button" class="remove-item-btn" 
+                                                    (click)="removeChallenge(i)">
+                                        <span class="material-icons">remove</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         
@@ -139,13 +143,15 @@
                                     <span class="material-icons">add</span>
                                 </button>
                             </div>
-                            <div *ngFor="let lesson of lessonsLearned.controls; let i = index" class="question-item">
-                                <textarea [formControlName]="i" placeholder="What did you learn today?" 
-                                                 rows="2" [style.color]="primaryColor"></textarea>
-                                <button *ngIf="lessonsLearned.controls.length > 1" type="button" class="remove-item-btn" 
-                                                (click)="removeLesson(i)">
-                                    <span class="material-icons">remove</span>
-                                </button>
+                            <div formArrayName="lessonsLearned">
+                                <div *ngFor="let lesson of lessonsLearned.controls; let i = index" class="question-item">
+                                    <textarea [formControlName]="i" placeholder="What did you learn today?" 
+                                                     rows="2" [style.color]="primaryColor"></textarea>
+                                    <button *ngIf="lessonsLearned.controls.length > 1" type="button" class="remove-item-btn" 
+                                                    (click)="removeLesson(i)">
+                                        <span class="material-icons">remove</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         
@@ -157,13 +163,15 @@
                                     <span class="material-icons">add</span>
                                 </button>
                             </div>
-                            <div *ngFor="let gratitudeItem of gratitude.controls; let i = index" class="question-item">
-                                <textarea [formControlName]="i" placeholder="Something you're thankful for..." 
-                                                 rows="2" [style.color]="primaryColor"></textarea>
-                                <button *ngIf="gratitude.controls.length > 1" type="button" class="remove-item-btn" 
-                                                (click)="removeGratitude(i)">
-                                    <span class="material-icons">remove</span>
-                                </button>
+                            <div formArrayName="gratitude">
+                                <div *ngFor="let gratitudeItem of gratitude.controls; let i = index" class="question-item">
+                                    <textarea [formControlName]="i" placeholder="Something you're thankful for..." 
+                                                     rows="2" [style.color]="primaryColor"></textarea>
+                                    <button *ngIf="gratitude.controls.length > 1" type="button" class="remove-item-btn" 
+                                                    (click)="removeGratitude(i)">
+                                        <span class="material-icons">remove</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         
@@ -175,13 +183,15 @@
                                     <span class="material-icons">add</span>
                                 </button>
                             </div>
-                            <div *ngFor="let improvement of improvements.controls; let i = index" class="question-item">
-                                <textarea [formControlName]="i" placeholder="Areas for growth..." 
-                                                 rows="2" [style.color]="primaryColor"></textarea>
-                                <button *ngIf="improvements.controls.length > 1" type="button" class="remove-item-btn" 
-                                                (click)="removeImprovement(i)">
-                                    <span class="material-icons">remove</span>
-                                </button>
+                            <div formArrayName="improvements">
+                                <div *ngFor="let improvement of improvements.controls; let i = index" class="question-item">
+                                    <textarea [formControlName]="i" placeholder="Areas for growth..." 
+                                                     rows="2" [style.color]="primaryColor"></textarea>
+                                    <button *ngIf="improvements.controls.length > 1" type="button" class="remove-item-btn" 
+                                                    (click)="removeImprovement(i)">
+                                        <span class="material-icons">remove</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         
@@ -193,13 +203,15 @@
                                     <span class="material-icons">add</span>
                                 </button>
                             </div>
-                            <div *ngFor="let goal of goalsForTomorrow.controls; let i = index" class="question-item">
-                                <textarea [formControlName]="i" placeholder="What do you want to achieve tomorrow?" 
-                                                 rows="2" [style.color]="primaryColor"></textarea>
-                                <button *ngIf="goalsForTomorrow.controls.length > 1" type="button" class="remove-item-btn" 
-                                                (click)="removeGoal(i)">
-                                    <span class="material-icons">remove</span>
-                                </button>
+                            <div formArrayName="goalsForTomorrow">
+                                <div *ngFor="let goal of goalsForTomorrow.controls; let i = index" class="question-item">
+                                    <textarea [formControlName]="i" placeholder="What do you want to achieve tomorrow?" 
+                                                     rows="2" [style.color]="primaryColor"></textarea>
+                                    <button *ngIf="goalsForTomorrow.controls.length > 1" type="button" class="remove-item-btn" 
+                                                    (click)="removeGoal(i)">
+                                        <span class="material-icons">remove</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
