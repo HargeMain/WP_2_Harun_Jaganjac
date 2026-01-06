@@ -1,0 +1,73 @@
+<div class="main-container">
+  <app-drawer-menu
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [role]="role"
+    [userId]="userId"
+    (drawerStateChange)="onDrawerStateChange($event)"
+    [userName]="username"
+  ></app-drawer-menu>
+
+  <app-header
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [role]="role"
+    [isDrawerOpen]="isDrawerOpen"
+  ></app-header>
+
+    <div class="content" [class.drawer-open]="isDrawerOpen">
+    <div class="bingo-container">
+      <div class="toolbar" [style.background]="primaryColor">
+        <button class="tool" (click)="exportToPDF()" [style.color]="primaryColor">
+          <i class="fa-solid fa-file-pdf"></i> PDF
+        </button>
+        <button class="tool" (click)="sendMail()" [style.color]="primaryColor">
+          <i class="fa-solid fa-envelope"></i> Mail
+        </button>
+      </div>
+
+      <div id="contentToConvert" #contentToConvert class="bingo-wrapper">
+        <h1 class="title" [style.color]="primaryColor">B I N G O</h1>
+
+        <table class="bingo-table">
+          <tr *ngFor="let row of bingoCells; let rowIndex = index">
+            <td *ngFor="let cell of row; let cellIndex = index" 
+                [class]="getCellClass(cell)"
+                (click)="toggleCellState(rowIndex, cellIndex)"
+                [style.border-color]="cell.isFree ? primaryColor : '#d9d9d9'">
+              {{cell.text}}
+              <div *ngIf="cell.mark && !cell.isFree" class="mark">{{cell.mark}}</div>
+            </td>
+          </tr>
+        </table>
+
+        <p class="rules">
+          Collect 5 signatures in a row – BINGO!<br>
+          Each person can put initials only twice.
+        </p>
+      </div>
+
+      <div id="emailModal" class="modal" *ngIf="showEmailModal">
+        <div class="modal-content">
+          <h2>Send by email</h2>
+          <label>Enter email:</label>
+          <input type="email" id="emailField" [(ngModel)]="emailField">
+          <div class="modal-buttons">
+            <button (click)="sendEmail()" [style.background]="primaryColor">Send</button>
+            <button class="cancel" (click)="cancelEmail()">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="notify" class="notify" [class.show]="showNotify" [style.background]="primaryColor">
+        {{notifyMessage}}
+      </div>
+    </div>
+  </div>
+
+  <app-footer
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [isDrawerOpen]="isDrawerOpen"
+  ></app-footer>
+</div>

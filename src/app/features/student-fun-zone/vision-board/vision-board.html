@@ -1,0 +1,100 @@
+<div class="main-container">
+
+  <app-drawer-menu
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [role]="role"
+    [userId]="userId"
+    [userName]="username"
+    (drawerStateChange)="onDrawerStateChange($event)">
+  </app-drawer-menu>
+
+  <app-header
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [role]="role"
+    [isDrawerOpen]="isDrawerOpen">
+  </app-header>
+
+  <div class="content" [class.drawer-open]="isDrawerOpen">
+
+    <div class="toolbar" [style.background]="primaryColor">
+
+      <label class="tool upload-btn">
+        <i class="fa-solid fa-image"></i> Add image
+        <input type="file" accept="image/*" (change)="addImage($event)">
+      </label>
+
+      <div class="separator"></div>
+
+      <button class="tool" (click)="addNote(false)">
+        <i class="fa-solid fa-note-sticky"></i> Note
+      </button>
+
+      <button class="tool" (click)="addNote(true)">
+        <i class="fa-solid fa-comment-dots"></i> Quote
+      </button>
+
+      <button class="tool" (click)="saveBoard()">
+        <i class="fa-solid fa-floppy-disk"></i> Save
+      </button>
+
+      <button class="tool danger" (click)="clearBoard()">
+        <i class="fa-solid fa-xmark"></i> Clear
+      </button>
+
+    </div>
+
+    <div
+      #board
+      class="board"
+      [style.background]="secondaryColor">
+
+      <ng-container *ngFor="let item of boardItems; let i = index">
+
+        <div
+          *ngIf="item.type !== 'img'"
+          class="note"
+          [class.quote]="item.type === 'quote'"
+          [style.left.px]="item.left"
+          [style.top.px]="item.top">
+
+          <div
+            class="note-header"
+            title="Drag"
+            (mousedown)="startDrag($event, i)">
+            ☰
+          </div>
+
+          <textarea
+            [(ngModel)]="item.content"
+            spellcheck="false">
+          </textarea>
+
+        </div>
+
+        <img
+          *ngIf="item.type === 'img'"
+          class="board-img"
+          [src]="item.content"
+          [style.left.px]="item.left"
+          [style.top.px]="item.top"
+          draggable="false"
+          (mousedown)="startDrag($event, i)">
+
+      </ng-container>
+    </div>
+
+  </div>
+
+  <app-footer
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [isDrawerOpen]="isDrawerOpen">
+  </app-footer>
+
+  <div class="notify" [class.show]="showNotify">
+    {{ notifyMessage }}
+  </div>
+
+</div>

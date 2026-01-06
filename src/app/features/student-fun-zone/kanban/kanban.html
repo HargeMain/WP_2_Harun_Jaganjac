@@ -1,0 +1,187 @@
+<div class="main-container">
+  <app-drawer-menu
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [role]="role"
+    [userId]="userId"
+    (drawerStateChange)="onDrawerStateChange($event)"
+    [userName]="username">
+  </app-drawer-menu>
+
+  <app-header
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [role]="role"
+    [isDrawerOpen]="isDrawerOpen">
+  </app-header>
+
+  <div class="content" [class.drawer-open]="isDrawerOpen">
+    <div class="kanban-container">
+      <div class="toolbar" [style.background]="primaryColor">
+        <button class="tool" (click)="openTaskModal()" [style.color]="primaryColor">
+          <i class="fa-solid fa-plus"></i> New Task
+        </button>
+
+        <div class="separator"></div>
+
+        <button class="tool" (click)="openSaveModal()" [style.color]="primaryColor">
+          <i class="fa-solid fa-floppy-disk"></i> Save
+        </button>
+        <button class="tool" (click)="openLoadModal()" [style.color]="primaryColor">
+          <i class="fa-solid fa-folder-open"></i> Load
+        </button>
+        <button class="tool danger" (click)="clearBoard()">
+          <i class="fa-solid fa-xmark"></i> Clear All
+        </button>
+
+        <div class="separator"></div>
+
+        <button class="tool" (click)="openEmailModal()" [style.color]="primaryColor">
+          <i class="fa-solid fa-envelope"></i> Mail
+        </button>
+        <button class="tool" (click)="exportPDF()" [style.color]="primaryColor">
+          <i class="fa-solid fa-file-pdf"></i> PDF
+        </button>
+        <button class="tool" (click)="exportPNG()" [style.color]="primaryColor">
+          <i class="fa-solid fa-image"></i> PNG
+        </button>
+        <button class="tool" (click)="printBoard()" [style.color]="primaryColor">
+          <i class="fa-solid fa-print"></i> Print
+        </button>
+      </div>
+
+      <div class="board">
+        <div class="column" data-col="todo" 
+             (dragover)="dragOver($event)" 
+             (drop)="drop($event, 'todo')">
+          <h2>
+            <i class="fa-regular fa-square" style="margin-right:6px;"></i>
+            To Do
+          </h2>
+          <div class="col-content">
+            <div *ngFor="let task of getTasksByColumn('todo')" 
+                 class="task" 
+                 draggable="true"
+                 (dragstart)="dragStart($event, task)"
+                 (dragend)="dragEnd($event)">
+              <strong>{{task.title}}</strong><br>
+              <span>{{task.desc}}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="column" data-col="progress" 
+             (dragover)="dragOver($event)" 
+             (drop)="drop($event, 'progress')">
+          <h2>
+            <i class="fa-solid fa-spinner fa-spin" style="margin-right:6px;"></i>
+            In Progress
+          </h2>
+          <div class="col-content">
+            <div *ngFor="let task of getTasksByColumn('progress')" 
+                 class="task" 
+                 draggable="true"
+                 (dragstart)="dragStart($event, task)"
+                 (dragend)="dragEnd($event)">
+              <strong>{{task.title}}</strong><br>
+              <span>{{task.desc}}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="column" data-col="done" 
+             (dragover)="dragOver($event)" 
+             (drop)="drop($event, 'done')">
+          <h2>
+            <i class="fa-solid fa-square-check" style="margin-right:6px;"></i>
+            Done
+          </h2>
+          <div class="col-content">
+            <div *ngFor="let task of getTasksByColumn('done')" 
+                 class="task" 
+                 draggable="true"
+                 (dragstart)="dragStart($event, task)"
+                 (dragend)="dragEnd($event)">
+              <strong>{{task.title}}</strong><br>
+              <span>{{task.desc}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-footer
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [isDrawerOpen]="isDrawerOpen">
+  </app-footer>
+
+  <!-- Modals -->
+  <div id="taskModal" class="modal" *ngIf="showTaskModal">
+    <div class="modal-content">
+      <h2>New Task</h2>
+      <label>Task Name:</label>
+      <input type="text" id="taskName" [(ngModel)]="taskName">
+      <label>Description:</label>
+      <textarea id="taskDesc" class="modal-textarea" [(ngModel)]="taskDesc"></textarea>
+      <div class="modal-buttons">
+        <button (click)="addTask()" [style.background]="primaryColor">Add</button>
+        <button class="cancel" (click)="closeTaskModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="saveModal" class="modal" *ngIf="showSaveModal">
+    <div class="modal-content">
+      <h2>Save Name</h2>
+      <input type="text" id="saveName" [(ngModel)]="saveName">
+      <div class="modal-buttons">
+        <button (click)="saveBoard()" [style.background]="primaryColor">Save</button>
+        <button class="cancel" (click)="closeSaveModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="loadModal" class="modal" *ngIf="showLoadModal">
+    <div class="modal-content">
+      <h2>Load Board</h2>
+      <select id="loadSelect" [(ngModel)]="loadSelect">
+        <option *ngFor="let board of savedBoards; let i = index" [value]="i">
+          {{i + 1}}) {{board.name}}
+        </option>
+      </select>
+      <div class="modal-buttons">
+        <button (click)="loadBoard()" [style.background]="primaryColor">Load</button>
+        <button class="cancel" (click)="closeLoadModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="emailModal" class="modal" *ngIf="showEmailModal">
+    <div class="modal-content">
+      <h2>Send by Email</h2>
+      <label>Email:</label>
+      <input type="email" id="emailField" [(ngModel)]="emailField">
+      <div class="modal-buttons">
+        <button (click)="nextEmail()" [style.background]="primaryColor">Send</button>
+        <button class="cancel" (click)="closeEmailModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="confirmModal" class="modal" *ngIf="showConfirmModal">
+    <div class="modal-content">
+      <h2>Confirmation</h2>
+      <p>Do you want to send the board?</p>
+      <div class="modal-buttons">
+        <button (click)="sendEmail()" [style.background]="primaryColor">Yes</button>
+        <button class="cancel" (click)="closeConfirmModal()">No</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="notify" class="notify" [class.show]="showNotify" [style.background]="primaryColor">
+    {{notifyMessage}}
+  </div>
+</div>

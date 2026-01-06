@@ -1,0 +1,24 @@
+<div class="main-container">
+  <app-drawer-menu
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [role]="role"
+    [userId]="userId"
+    (drawerStateChange)="onDrawerStateChange($event)"
+    [userName]="username"
+  ></app-drawer-menu>
+
+  <app-header
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [role]="role"
+    [isDrawerOpen]="isDrawerOpen"
+  ></app-header>
+
+
+  <app-footer
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [isDrawerOpen]="isDrawerOpen"
+  ></app-footer>
+</div>

@@ -1,0 +1,115 @@
+<div class="main-container">
+
+    <app-drawer-menu [primaryColor]="primaryColor" [secondaryColor]="secondaryColor" [role]="role" [userId]="userId"
+        [userName]="username" (drawerStateChange)="onDrawerStateChange($event)">
+    </app-drawer-menu>
+
+    <app-header [primaryColor]="primaryColor" [secondaryColor]="secondaryColor" [role]="role"
+        [isDrawerOpen]="isDrawerOpen">
+    </app-header>
+
+    <div class="content" [class.drawer-open]="isDrawerOpen">
+
+        <div class="quiz-container">
+
+            <h1 class="title">Q U I Z</h1>
+            <p class="subtitle">
+                Welcome to the student quiz! Test your knowledge of HTML and web basics.<br>
+                <b>Select the correct answer(s) for each question.</b>
+            </p>
+
+            <div class="question">
+                <h3>1. What does HTML stand for?</h3>
+                <label><input type="radio" name="q1" value="a" [(ngModel)]="answers.q1"> HyperText Markup
+                    Language</label>
+                <label><input type="radio" name="q1" value="b" [(ngModel)]="answers.q1"> HyperText Markdown
+                    Language</label>
+                <label><input type="radio" name="q1" value="c" [(ngModel)]="answers.q1"> HyperText Makeup
+                    Language</label>
+            </div>
+
+            <div class="question">
+                <h3>2. Which tags are used to create lists in HTML?</h3>
+                <label>
+                    <input type="checkbox" value="a" [checked]="answers.q2.includes('a')"
+                        (change)="toggleCheckbox('q2', 'a', $event)">
+                    &lt;ul&gt;
+                </label>
+
+                <label>
+                    <input type="checkbox" value="b" [checked]="answers.q2.includes('b')"
+                        (change)="toggleCheckbox('q2', 'b', $event)">
+                    &lt;ol&gt;
+                </label>
+
+                <label>
+                    <input type="checkbox" value="c" [checked]="answers.q2.includes('c')"
+                        (change)="toggleCheckbox('q2', 'c', $event)">
+                    &lt;br&gt;
+                </label>
+
+            </div>
+
+            <div class="question">
+                <h3>3. Which tag is used to insert an image?</h3>
+                <label><input type="radio" name="q3" value="a" [(ngModel)]="answers.q3"> &lt;image&gt;</label>
+                <label><input type="radio" name="q3" value="b" [(ngModel)]="answers.q3"> &lt;img&gt;</label>
+                <label><input type="radio" name="q3" value="c" [(ngModel)]="answers.q3"> &lt;src&gt;</label>
+            </div>
+
+            <div class="question">
+                <h3>4. Which of the following are valid HTML attributes?</h3>
+                <label>
+                    <input type="checkbox" value="a" [checked]="answers.q4.includes('a')"
+                        (change)="toggleCheckbox('q4', 'a', $event)">
+                    href
+                </label>
+
+                <label>
+                    <input type="checkbox" value="b" [checked]="answers.q4.includes('b')"
+                        (change)="toggleCheckbox('q4', 'b', $event)">
+                    src
+                </label>
+
+                <label>
+                    <input type="checkbox" value="c" [checked]="answers.q4.includes('c')"
+                        (change)="toggleCheckbox('q4', 'c', $event)">
+                    bold
+                </label>
+
+                <label>
+                    <input type="checkbox" value="d" [checked]="answers.q4.includes('d')"
+                        (change)="toggleCheckbox('q4', 'd', $event)">
+                    alt
+                </label>
+
+            </div>
+
+            <div class="question">
+                <h3>5. What is the correct way to create a link in HTML?</h3>
+                <label><input type="radio" name="q5" value="a" [(ngModel)]="answers.q5"> &lt;a
+                    url="example.com"&gt;</label>
+                <label><input type="radio" name="q5" value="b" [(ngModel)]="answers.q5"> &lt;a
+                    href="example.com"&gt;</label>
+                <label><input type="radio" name="q5" value="c" [(ngModel)]="answers.q5"> &lt;link&gt;</label>
+            </div>
+
+            <button class="check-btn" (click)="checkAnswers()">
+                <i class="fa-solid fa-square-check"></i> Check answers
+            </button>
+
+        </div>
+    </div>
+
+    <app-footer [primaryColor]="primaryColor" [secondaryColor]="secondaryColor" [isDrawerOpen]="isDrawerOpen">
+    </app-footer>
+
+    <div class="modal" *ngIf="showModal">
+        <div class="modal-content score-box">
+            <div class="score-emoji">{{scoreEmoji}}</div>
+            <h2>You scored {{score}} / {{total}}</h2>
+            <button (click)="resetQuiz()">Try again</button>
+        </div>
+    </div>
+
+</div>
