@@ -1,0 +1,107 @@
+<div class="main-container" 
+     [style.--primary-color]="primaryColor"
+     [style.--secondary-color]="secondaryColor">
+
+  <app-drawer-menu
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [role]="role"
+    [userId]="userId"
+    [userName]="username"
+    (drawerStateChange)="onDrawerStateChange($event)">
+  </app-drawer-menu>
+
+  <app-header
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [role]="role"
+    [isDrawerOpen]="isDrawerOpen">
+  </app-header>
+
+  <div class="content" [class.drawer-open]="isDrawerOpen">
+
+    <div class="admin-header">
+      <span class="admin-icon">👑</span>
+      <span class="admin-title">Admin {{ username }}</span>
+    </div>
+
+    <div class="table-wrapper" [style.border-color]="primaryColor">
+
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th [style.--col-index]="0">User</th>
+            <th [style.--col-index]="1">Email</th>
+            <th [style.--col-index]="2">Age</th>
+            <th [style.--col-index]="3">Role</th>
+            <th [style.--col-index]="4">Created</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let user of allUsers; let i = index"
+              (contextmenu)="onRightClick($event, user)"
+              [class.loading]="deletingUserId === user.uid"
+              [style.--row-index]="i"
+              [attr.data-user-id]="user.uid">
+
+            <td class="user-cell">
+              <div class="avatar-wrapper">
+                <img *ngIf="user.imageBase64; else defaultAvatar"
+                     [src]="user.imageBase64"
+                     class="avatar"
+                     [alt]="user.name">
+
+                <ng-template #defaultAvatar>
+                  <div class="avatar default-avatar">👤</div>
+                </ng-template>
+              </div>
+
+              <div class="user-info">
+                <div class="user-name">
+                  {{ user.name }} {{ user.surname }}
+                </div>
+                <div class="user-username">
+                  @{{ user.userName || 'user' }}
+                </div>
+              </div>
+            </td>
+
+            <td class="email-cell">
+              ✉️ {{ user.email }}
+            </td>
+
+            <td>{{ user.age || '-' }}</td>
+
+            <td>
+              <span class="role-pill">
+                {{ user.role }}
+              </span>
+            </td>
+
+            <td>{{ formatDate(user.createdAt) }}</td>
+          </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <div class="context-menu"
+         *ngIf="contextMenu.visible"
+         [style.left.px]="contextMenu.x"
+         [style.top.px]="contextMenu.y">
+      <div class="context-item" (click)="deleteUser(contextMenu.userId)">
+        🗑 Delete user
+      </div>
+    </div>
+
+  </div>
+
+  <app-footer
+    [primaryColor]="primaryColor"
+    [secondaryColor]="secondaryColor"
+    [isDrawerOpen]="isDrawerOpen">
+  </app-footer>
+
+</div>

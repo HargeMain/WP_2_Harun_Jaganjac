@@ -16,6 +16,79 @@
   text-align: center;
 }
 
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  background: white;
+  padding: 25px;
+  width: 320px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 8px;
+  margin: 15px 0;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.cancel {
+  background: #999 !important;
+  color: white !important;
+}
+
+
+.toolbar {
+  padding: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.tool {
+  background: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tool.active {
+  background: #ffd000;
+}
+
+.board {
+  flex: 1;
+  width: 100%;
+  background: white;
+  cursor: crosshair;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  padding: 100px 20px 80px;
+}
+
+.content.drawer-open {
+  padding-left: 300px;
+}
+
+
 .content.drawer-open {
   padding-left: 300px; 
 }

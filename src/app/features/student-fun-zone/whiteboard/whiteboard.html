@@ -1,24 +1,89 @@
 <div class="main-container">
+
   <app-drawer-menu
     [primaryColor]="primaryColor"
     [secondaryColor]="secondaryColor"
     [role]="role"
     [userId]="userId"
-    (drawerStateChange)="onDrawerStateChange($event)"
     [userName]="username"
-  ></app-drawer-menu>
+    (drawerStateChange)="onDrawerStateChange($event)">
+  </app-drawer-menu>
 
   <app-header
     [primaryColor]="primaryColor"
     [secondaryColor]="secondaryColor"
     [role]="role"
-    [isDrawerOpen]="isDrawerOpen"
-  ></app-header>
+    [isDrawerOpen]="isDrawerOpen">
+  </app-header>
 
+  <div class="content" [class.drawer-open]="isDrawerOpen">
+
+    <div class="toolbar" [style.background]="primaryColor">
+
+      <button class="tool" [class.active]="tool==='pencil'"
+        (click)="setTool('pencil')">
+        ✏️ Pencil
+      </button>
+
+      <button class="tool" [class.active]="tool==='eraser'"
+        (click)="setTool('eraser')">
+        🧽 Eraser
+      </button>
+
+      <input type="color" [(ngModel)]="color">
+      <input type="range" min="1" max="30" [(ngModel)]="lineWidth">
+
+      <button class="tool" (click)="clearBoard()">🗑️ Clear</button>
+      <button class="tool" (click)="exportPNG()">🖼️ PNG</button>
+      <button class="tool" (click)="exportPDF()">📄 PDF</button>
+      <button class="tool" (click)="printBoard()">🖨️ Print</button>
+      <button class="tool" (click)="openEmailModal()">✉️ Mail</button>
+
+    </div>
+
+    <canvas
+      #canvas
+      class="board"
+      (mousedown)="startDraw($event)"
+      (mouseup)="stopDraw()"
+      (mouseleave)="stopDraw()"
+      (mousemove)="draw($event)">
+    </canvas>
+
+  </div>
 
   <app-footer
     [primaryColor]="primaryColor"
     [secondaryColor]="secondaryColor"
-    [isDrawerOpen]="isDrawerOpen"
-  ></app-footer>
+    [isDrawerOpen]="isDrawerOpen">
+  </app-footer>
+
+</div>
+
+<div class="modal" *ngIf="showEmailModal">
+  <div class="modal-content">
+    <h2>Send Whiteboard</h2>
+
+    <input
+      type="email"
+      placeholder="email@example.com"
+      [(ngModel)]="emailValue">
+
+    <div class="modal-buttons">
+      <button (click)="confirmEmail()">Send</button>
+      <button class="cancel" (click)="closeModals()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" *ngIf="showConfirmModal">
+  <div class="modal-content">
+    <h2>Are you sure?</h2>
+    <p>Whiteboard will be sent to email.</p>
+
+    <div class="modal-buttons">
+      <button (click)="sendConfirmedMail()">Yes</button>
+      <button class="cancel" (click)="closeModals()">No</button>
+    </div>
+  </div>
 </div>

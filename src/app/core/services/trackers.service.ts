@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, doc, setDoc, updateDoc, getDoc } from '@angular/fire/firestore';
+import { Firestore, doc, setDoc, updateDoc, getDoc, deleteDoc } from '@angular/fire/firestore';
 import { Trackers } from '../models/trackers.model';
 import { TrackerTable } from '../models/tracker_table.model';
 
@@ -67,6 +67,11 @@ export class TrackersService {
     const trackerRef = doc(this.firestore, 'trackers', userId);
     const snap = await getDoc(trackerRef);
     return snap.exists() ? (snap.data() as Trackers) : null;
+  }
+
+    async deleteTrackers(userId: string): Promise<void> {
+    const trackerRef = doc(this.firestore, 'trackers', userId);
+    await deleteDoc(trackerRef);
   }
 
   async getAllTrackersAsTables(userId: string): Promise<TrackerTable[]> {
